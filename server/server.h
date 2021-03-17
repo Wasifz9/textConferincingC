@@ -1,6 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
-//wasif password 128.100.13.132 5000
+//wasif legendary 128.100.13.132 5000
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include<arpa/inet.h>
 #include <unistd.h> 
+
+
 char buff[2000]; 
 struct Message {
     unsigned int type;

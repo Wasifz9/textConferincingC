@@ -40,7 +40,7 @@ int processPacket(char* packet){
     memcpy(&msg.data, packet + i1, atoi(size));
     msg.type = atoi(type);
     msg.size = atoi(size);
-    strcpy(msg.source, source); 
+    strcpy(msg.source,source); 
 
     /// based on type, we process data portion differently 
     int ret = responseHandler(msg);
@@ -57,10 +57,10 @@ int processPacket(char* packet){
 
 
 int responseHandler(struct Message msg){
-    printf("\n-- Message --\n");
+    /*printf("\n-- Message --\n");
     printf("type = %d | size = %d | sourceID = %s\n",
         msg.type, msg.size, msg.source);
-    printf("data: %s\n", msg.data);
+    printf("data: %s\n", msg.data);*/
 
     if (msg.type == 1){
         int ret = loginClient(msg.data);

@@ -1,5 +1,10 @@
 #include "server.h"
 
+
+const char *clientIDs[] = {"wasif","nissar","instructor"}; // will need to code data structures 
+const char *clientPasswords[] = {"legendary", "pathetic", "allknowing"}; // will need to code data structures 
+
+
 int loginClient(char* credentials){
     // check client credentials against authorized credentials
     // check client credentials against real time connected users 
@@ -31,6 +36,17 @@ int loginClient(char* credentials){
     }
 
     printf("A client is trying to join with the credentals: \n username: %s\n password: %s\n", username, password);
+
+
+    if (strcmp(clientIDs[0], username) == 0){
+        if (strcmp(clientPasswords[0], password) == 0){
+            printf("User has been authorized!\n"); // need to send acks with these prints as the data of the packet
+        } else { 
+            printf("Incorrect password for client!\n");// need to send nack
+        }
+    } else{
+        printf("Client not found!\n"); // need to send nack 
+    }
     free(username);
     free(password);
     return 1;

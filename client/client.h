@@ -9,8 +9,8 @@
 #include <unistd.h> 
 #define _GNU_SOURCE
 
-char**[4]
-struct Message {
+
+struct Message{
     unsigned int type;
     unsigned int size;
     unsigned char source[20];
