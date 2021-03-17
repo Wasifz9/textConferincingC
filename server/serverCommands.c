@@ -40,7 +40,9 @@ int loginClient(char* credentials){
 
     if (strcmp(clientIDs[0], username) == 0){
         if (strcmp(clientPasswords[0], password) == 0){
-            printf("User has been authorized!\n"); // need to send acks with these prints as the data of the packet
+             // need to send acks with these prints as the data of the packet
+             // need to keep track of this signed in user 
+            printf("User has been authorized!\n");
         } else { 
             printf("Incorrect password for client!\n");// need to send nack
         }
@@ -52,3 +54,10 @@ int loginClient(char* credentials){
     return 1;
 }
 
+int joinSession(const struct Message msg){
+
+}
+
+int leaveSession(const struct Message msg){
+    
+}

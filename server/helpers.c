@@ -62,10 +62,13 @@ int responseHandler(struct Message msg){
         msg.type, msg.size, msg.source);
     printf("data: %s\n", msg.data);*/
 
-    if (msg.type == 1){
+    if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
         int ret = loginClient(msg.data);
+    } else if (msg.type == 2){
+        int ret = joinSession(msg);
+    } else if (msg.type == 3){
+        int ret = leaveSession(msg);
     }
-
 }
 
 void debugger(int code){

@@ -45,7 +45,6 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
     char *serializedPacket = malloc(sizeof(char) * 1100);
     asprintf(&serializedPacket, "%d:%d:%s:%s", type,
         size, source, data);
-    printf("%s\n", serializedPacket);
     write(connfd, serializedPacket, 2048);
     read(connfd, ackReceipt, sizeof(ackReceipt));
 
