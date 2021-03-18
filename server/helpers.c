@@ -27,6 +27,8 @@ int eventHandler (struct Server* sv, int connfd){
             int ret = leaveSession(msg);
         }
 
+        printf("%s has been entered into the server's client list!\n", sv->clients[0]->username);
+
         // writing an ack here for now. but response handler should call a response function that sends
         // the required ack packets as described in the document 
         write(connfd, "ACK", sizeof(3));

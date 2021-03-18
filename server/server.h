@@ -21,6 +21,7 @@
 #define MAX_CLIENT_PASS 20
 #define MAX_DATA_SIZE 1000
 #define ACCEPTED_CLIENTS 3
+#define MAX_SESSION_NAME 10
 
 struct Server {
     struct Session* sessions[MAX_SESSIONS];
@@ -30,8 +31,10 @@ struct Server {
 };
 
 struct Session {
-    unsigned int sID;
+    unsigned int sID; // internal
+    char sessionID[MAX_SESSION_NAME]; // from client
     struct Client* clients[MAX_SESSION_MEMS];
+    int memberCount; 
 };
 
 struct Client {

@@ -60,24 +60,43 @@ int loginClient(struct Server* sv, const struct Message msg, int connfd){
 }
 
 int joinSession(const struct Message msg){
-
+    return 0;
 }
 
 int leaveSession(const struct Message msg){
-
+    return 0;
 }
 
-void client_init(struct Server* sv, const struct Message msg, int connfd){
+void client_init(struct Server* sv, const struct Message msg, int connfd){ 
+    // need to error check this (clients already logged in) cleints full
     struct Client* cli = malloc(sizeof(struct Client));
     strcpy(cli->username,msg.source);
     cli->sessionJoined = -1; //-1 means hasnt joined one yet 
     cli->connfd = connfd;
 
-    for (int i = 0; i<ACCEPTED_CLIENTS; i++){
+    for (int i = 0; i<ACCEPTED_CLIENTS; i++){ // currently just filling next available spot 
         if (sv->clients[i] == NULL){
             sv->clients[i] = cli;
             cli->cId = i; 
         }
     }
 }
+
+void session_init(struct Server* sv, const struct Message msg, struct Client* cli){
+    // need to error check this (server ID already exists) severs full 
+    struct Session* sess = malloc(sizeof(struct Session));
+    strcpy(sess->sessionID,msg.data);
+    sess->memberCount = 1; 
+    sess->clients[0] = cli;
+    
+    for (int i = 0; i<MAX_SESSIONS; i++){ // currently just filling next available spot 
+        if (sv->sessions[i] == NULL){
+            sv->sessions[i] = sess;
+            sess->sID = i; 
+        }
+    }
+}
+
+
+
 
