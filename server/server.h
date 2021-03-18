@@ -71,8 +71,8 @@ struct Server* server_init();
 //client
 void client_init(struct Server* sv, const struct Message, int connfd);
 
-//server
-struct Server* server_init(); 
+//session
+void session_init(struct Server* sv, const struct Message msg, struct Client* cli); 
 
 
 #endif

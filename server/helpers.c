@@ -27,7 +27,10 @@ int eventHandler (struct Server* sv, int connfd){
             int ret = leaveSession(msg);
         }
 
-        printf("%s has been entered into the server's client list!\n", sv->clients[0]->username);
+        // testing the creation of clients and sessions 
+        //printf("%s has been entered into the server's client list!\n", sv->clients[0]->username);
+        //session_init(sv,msg, sv->clients[0]);
+        //printf("%s has been initialized as a session!\n", sv->sessions[0]->sessionID);
 
         // writing an ack here for now. but response handler should call a response function that sends
         // the required ack packets as described in the document 
