@@ -3,22 +3,7 @@
 // have to write more code to handle requests cleaner. 
 // this function will be complciated 
 
-int requestLoop (int connfd){ 
-    //while(1){
-        memset(&buff, 0, sizeof(buff)); 
-        read(connfd, buff, sizeof(buff));
-        
-        // error handle the processing. 
-        // currently thinking to do most error handling on client side (size length etc)
-        // so we dont have to send too many nacks. nacks only if the networks part doesnt work for
-        // some reason 
-        int ret = processPacket(buff); 
 
-        // writing an ack here for now. but response handler should call a response function that sends
-        // the required ack packets as described in the document 
-        write(connfd, "ACK", sizeof(3));
-    //}
-}
 
 int main (int argc, char *argv[]){
     if (argc != 2){
@@ -51,7 +36,9 @@ int main (int argc, char *argv[]){
         printf("couldn't bind.\n");
         exit(1);
     }
-    
+
+    struct Server* sv = server_init();
+
 
     if ((listen(sock_fd, 10)) != 0) { 
         printf("Listen failed...\n"); 
@@ -72,11 +59,26 @@ int main (int argc, char *argv[]){
         printf("couldn't accept.\n");
         exit(1);
     } else {
-        requestLoop(connfd);
+        eventHandler(connfd);
     }
 
     close(connfd);
     close(sock_fd);
 }
+
+
+struct Server* server_init(){
+	struct Server *sv;
+	sv = malloc(sizeof(struct Server));
+    sv->activeSessions = 0;
+    sv->activeClients = 0;
+    for(int i = 0; i < MAX_SESSIONS ; ++i)
+        sv->sessions[i] = (struct Session*)malloc(sizeof(struct Session));
+    for(int i = 0; i < MAX_SESSIONS ; ++i)
+        sv->clients[i] = (struct Client*)malloc(sizeof(struct Client));
+    
+    return sv;
+}
+
 
 

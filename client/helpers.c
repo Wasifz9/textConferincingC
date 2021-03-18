@@ -31,7 +31,7 @@ int establishConnection(char* clientID, char* password, char* serverIP, char* se
     char *loginData = malloc(sizeof(char) * 1100);
     asprintf(&loginData, "%s,%s", clientID, password);
 
-    if(msgSender(1, strlen(loginData)+1, clientID, loginData, sock_fd) == 1){
+    if(msgSender(1, strlen(loginData), clientID, loginData, sock_fd) == 1){
         return 1;
     } else {
         return -1;

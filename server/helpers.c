@@ -1,6 +1,45 @@
 #include "server.h"
 
-int processPacket(char* packet){
+int eventHandler (int connfd){ 
+    //while(1){
+        memset(&buff, 0, sizeof(buff)); 
+        read(connfd, buff, sizeof(buff));
+        
+        // error handle the processing. 
+        // currently thinking to do most error handling on client side (size length etc)
+        // so we dont have to send too many nacks. nacks only if the networks part doesnt work for
+        // some reason 
+        struct Message msg;
+        processPacket(buff, &msg); 
+        
+        printf("\n-- Message --\n");
+        printf("type = %d | size = %d | sourceID = %s\n",
+        msg.type, msg.size, msg.source);
+        printf("data: %s\n", msg.data);
+        
+        
+        if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
+            int ret = loginClient(msg);
+        } else if (msg.type == 2){
+            int ret = joinSession(msg);
+        } else if (msg.type == 3){
+            int ret = leaveSession(msg);
+        }
+
+
+        // writing an ack here for now. but response handler should call a response function that sends
+        // the required ack packets as described in the document 
+        write(connfd, "ACK", sizeof(3));
+    //}
+}
+
+
+
+
+
+
+
+void processPacket(char* packet, struct Message* msg){
     unsigned int member = 1;
     char *type;   //member 1
     char *size;         //member 2
@@ -36,18 +75,18 @@ int processPacket(char* packet){
     }
 
 
-    struct Message msg; 
-    memcpy(&msg.data, packet + i1, atoi(size));
-    msg.type = atoi(type);
-    msg.size = atoi(size);
-    strcpy(msg.source,source); 
-
+    
+    memset(&msg->data, 0, atoi(size)+1);
+    memcpy(&msg->data, packet + i1, atoi(size));
+    msg->type = atoi(type);
+    msg->size = atoi(size);
+    strcpy(msg->source,source); 
+    
     /// based on type, we process data portion differently 
-    int ret = responseHandler(msg);
+    
     free(type);
     free(source);
     free(size);
-
 }
 
 
@@ -55,21 +94,6 @@ int processPacket(char* packet){
 /// and return the correct corresponding ACK/NACK depending on the 
 /// return value of the server command 
 
-
-int responseHandler(struct Message msg){
-    /*printf("\n-- Message --\n");
-    printf("type = %d | size = %d | sourceID = %s\n",
-        msg.type, msg.size, msg.source);
-    printf("data: %s\n", msg.data);*/
-
-    if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
-        int ret = loginClient(msg.data);
-    } else if (msg.type == 2){
-        int ret = joinSession(msg);
-    } else if (msg.type == 3){
-        int ret = leaveSession(msg);
-    }
-}
 
 void debugger(int code){
     printf("you made it here: %d\n", code);

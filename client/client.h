@@ -12,7 +12,7 @@
 #define MAX_SESSIONS_JOINED 3
 #define MAX_SESSIONS 8 
 #define MAX_CLIENTS 32 
-#define MAX_CLIENT_ID 10
+#define MAX_CLIENT_ID 20
 #define MAX_CLIENT_PASS 10
 #define MAX_DATA_SIZE 1000
 
