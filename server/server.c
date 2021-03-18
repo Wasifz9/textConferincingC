@@ -59,7 +59,7 @@ int main (int argc, char *argv[]){
         printf("couldn't accept.\n");
         exit(1);
     } else {
-        eventHandler(connfd);
+        eventHandler(sv,connfd);
     }
 
     close(connfd);
@@ -72,10 +72,11 @@ struct Server* server_init(){
 	sv = malloc(sizeof(struct Server));
     sv->activeSessions = 0;
     sv->activeClients = 0;
+    /*
     for(int i = 0; i < MAX_SESSIONS ; ++i)
         sv->sessions[i] = (struct Session*)malloc(sizeof(struct Session));
     for(int i = 0; i < MAX_SESSIONS ; ++i)
-        sv->clients[i] = (struct Client*)malloc(sizeof(struct Client));
+        sv->clients[i] = (struct Client*)malloc(sizeof(struct Client));*/
     
     return sv;
 }

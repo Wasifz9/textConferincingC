@@ -33,8 +33,8 @@ struct Session {
 
 struct Client {
     char username[MAX_CLIENT_ID]; // same as ClientID from client perspective 
-    char password[MAX_CLIENT_PASS];
-    unsigned int sessionJoined; // later make array of sessions joined 
+    unsigned int cId; 
+    int sessionJoined; // later make array of sessions joined 
     int connfd; 
 };
 
@@ -46,19 +46,27 @@ struct Message {
     unsigned char data[1000];
 };
 
-
-int eventHandler(int connfd);
-void processPacket(char* packet, struct Message*);
-void debugger(int code);
-struct Server* server_init();
 // server commands 
-int loginClient(const struct Message);
+int loginClient(struct Server* sv, const struct Message, int connfd);
 int logoutClient();
 int joinSession(const struct Message);
 int leaveSession(const struct Message);
 int newSession(int sessionID);
 int listStatus();
 
+// helpers
+int eventHandler(struct Server* sv, int connfd);
+void processPacket(char* packet, struct Message*);
+void debugger(int code);
+
+//server 
+struct Server* server_init();
+
+//client
+void client_init(struct Server* sv, const struct Message, int connfd);
+
+//server
+struct Server* server_init(); 
 
 
 #endif

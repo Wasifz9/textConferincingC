@@ -1,10 +1,11 @@
 #include "server.h"
 
-int eventHandler (int connfd){ 
+int eventHandler (struct Server* sv, int connfd){ 
     //while(1){
+ 
         memset(&buff, 0, sizeof(buff)); 
         read(connfd, buff, sizeof(buff));
-        
+    
         // error handle the processing. 
         // currently thinking to do most error handling on client side (size length etc)
         // so we dont have to send too many nacks. nacks only if the networks part doesnt work for
@@ -19,13 +20,12 @@ int eventHandler (int connfd){
         
         
         if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
-            int ret = loginClient(msg);
+            int ret = loginClient(sv, msg, connfd);
         } else if (msg.type == 2){
             int ret = joinSession(msg);
         } else if (msg.type == 3){
             int ret = leaveSession(msg);
         }
-
 
         // writing an ack here for now. but response handler should call a response function that sends
         // the required ack packets as described in the document 
@@ -98,3 +98,4 @@ void processPacket(char* packet, struct Message* msg){
 void debugger(int code){
     printf("you made it here: %d\n", code);
 }
+

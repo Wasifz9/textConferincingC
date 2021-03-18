@@ -5,7 +5,7 @@ const char *acceptedClientIDs[] = {"wasifz9","nissar","instructor"}; // will nee
 const char *acceptedClientPasswords[] = {"password", "pathetic", "allknowing"}; // will need to code data structures 
 
 
-int loginClient(const struct Message msg){
+int loginClient(struct Server* sv, const struct Message msg, int connfd){
     // check client credentials against authorized credentials
     // check client credentials against real time connected users 
     unsigned int member = 1;
@@ -39,10 +39,11 @@ int loginClient(const struct Message msg){
 
     for (int i = 0; i < ACCEPTED_CLIENTS; i++){
         if (strcmp(acceptedClientIDs[i], username) == 0){
-            if (strcmp(acceptedClientPasswords[i], password) == 0){
+            if (strcmp(acceptedClientPasswords[i], password) == 0){ // need to send the prints as LO_NAKS
                 printf("User has been authorized!\n");
                 /// init user and add too server struct lists 
                 // send appropriat LO_ACK
+                client_init(sv, msg, connfd);
                 return 1;
             }else{
                 printf("Incorrect password for client!\n");
@@ -51,10 +52,11 @@ int loginClient(const struct Message msg){
             }
         }
     }
-
+    printf("User not found!\n");
     free(username);
     free(password);
     return 1;
+    
 }
 
 int joinSession(const struct Message msg){
@@ -64,3 +66,18 @@ int joinSession(const struct Message msg){
 int leaveSession(const struct Message msg){
 
 }
+
+void client_init(struct Server* sv, const struct Message msg, int connfd){
+    struct Client* cli = malloc(sizeof(struct Client));
+    strcpy(cli->username,msg.source);
+    cli->sessionJoined = -1; //-1 means hasnt joined one yet 
+    cli->connfd = connfd;
+
+    for (int i = 0; i<ACCEPTED_CLIENTS; i++){
+        if (sv->clients[i] == NULL){
+            sv->clients[i] = cli;
+            cli->cId = i; 
+        }
+    }
+}
+
