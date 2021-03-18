@@ -8,13 +8,20 @@
 #include <arpa/inet.h>
 #include <unistd.h> 
 #define _GNU_SOURCE
+#define MAX_SESSION_MEMS 8
+#define MAX_SESSIONS_JOINED 3
+#define MAX_SESSIONS 8 
+#define MAX_CLIENTS 32 
+#define MAX_CLIENT_ID 10
+#define MAX_CLIENT_PASS 10
+#define MAX_DATA_SIZE 1000
 
 
 struct Message{
     unsigned int type;
     unsigned int size;
-    unsigned char source[20];
-    unsigned char data[1000];
+    unsigned char source[MAX_CLIENT_ID];
+    unsigned char data[MAX_DATA_SIZE];
 };
 int login(char *clientID, char *password, char *serverIP, char *serverPort);
 int logout();
