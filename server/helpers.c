@@ -1,8 +1,8 @@
 #include "server.h"
 
 int eventHandler (struct Server* sv, int connfd){ 
-    //while(1){
- 
+    while(1){
+        printf("\nWaiting for new read in eventHandler.. \n");
         memset(&buff, 0, sizeof(buff)); 
         read(connfd, buff, sizeof(buff));
     
@@ -31,6 +31,15 @@ int eventHandler (struct Server* sv, int connfd){
         for (int i = 0; sv->clients[i] != NULL; i++){
             printf("%s is Client #%d in the TCserver!\n", sv->clients[i]->username, sv->clients[i]->cId);
         } 
+        
+        for (int i = 0; sv->sessions[i] != NULL; i++){
+            printf("%s is session #%d in the TCserver!\n", sv->sessions[i]->sessionID, sv->sessions[i]->sID);
+            printf("Active members: \n");
+            for (int j = 0; sv->sessions[i]->clients[j] != NULL; j++){
+                printf("%s\n", sv->sessions[i]->clients[j]->username);
+            } 
+        } 
+
         //
         //session_init(sv,msg, sv->clients[0]);
         //printf("%s has been initialized as a session!\n", sv->sessions[0]->sessionID);
@@ -39,7 +48,7 @@ int eventHandler (struct Server* sv, int connfd){
         // the required ack packets as described in the document 
         
         
-    //}
+    }
 }
 
 // parse paclet into members and data 

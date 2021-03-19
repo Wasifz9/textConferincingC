@@ -21,7 +21,7 @@
 #define MAX_CLIENT_PASS 20
 #define MAX_DATA_SIZE 1000
 #define ACCEPTED_CLIENTS 3
-#define MAX_SESSION_NAME 10
+#define MAX_SESSION_NAME 20
 
 struct Server {
     struct Session* sessions[MAX_SESSIONS];

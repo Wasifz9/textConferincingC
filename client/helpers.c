@@ -45,7 +45,8 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
     char *serializedPacket = malloc(sizeof(char) * 1100);
     asprintf(&serializedPacket, "%d:%d:%s:%s", type,
         size, source, data);
-    write(connfd, serializedPacket, 2048);
+    //printf("message to send: %s\n", serializedPacket);
+    write(connfd, serializedPacket, strlen(serializedPacket));
     read(connfd, ackReceipt, sizeof(ackReceipt));
 
 
@@ -60,6 +61,9 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
     } else if (strcmp(ackReceipt, "LO_NACK") == 0) {
         printf("Log in failed.\n");
         return -1;
+    }  else if (strcmp(ackReceipt, "NS_ACK") == 0) {
+        printf("New session successfully created!\n");
+        return 1;
     }
 }
 

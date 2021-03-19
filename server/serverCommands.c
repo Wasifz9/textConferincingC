@@ -43,7 +43,7 @@ void loginClient(struct Server* sv, const struct Message msg, int connfd){
                 printf("User has been authorized!\n");
                 /// init user and add too server struct lists 
                 // send appropriat LO_ACK
-                acknowledger(connfd, "LO_ACK");
+                
                 client_init(sv, msg, connfd);
                 return 1;
             }else{
@@ -86,6 +86,7 @@ void client_init(struct Server* sv, const struct Message msg, int connfd){
         if (sv->clients[i] == NULL){
             sv->clients[i] = cli;
             cli->cId = i;
+            acknowledger(cli->connfd, "LO_ACK");
             break; 
         }
     }
@@ -102,6 +103,7 @@ void session_init(struct Server* sv, const struct Message msg, struct Client* cl
         if (sv->sessions[i] == NULL){
             sv->sessions[i] = sess;
             sess->sID = i;
+            acknowledger(cli->connfd, "NS_ACK");
             break; 
         }
     }

@@ -28,6 +28,7 @@ int leavesession(){
 }
 
 int createsession(char* sessionID){
+    printf("%s, %d\n",username, clientFD);
     int ret = msgSender(2, strlen(sessionID), username, sessionID, clientFD);
     return 0;
 }
