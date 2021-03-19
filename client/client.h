@@ -23,6 +23,12 @@ struct Message{
     unsigned char source[MAX_CLIENT_ID];
     unsigned char data[MAX_DATA_SIZE];
 };
+
+char username[MAX_CLIENT_ID]; 
+int clientFD; 
+int loginFlag;
+
+
 int login(char *clientID, char *password, char *serverIP, char *serverPort);
 int logout();
 int joinsession(char* sessionID);

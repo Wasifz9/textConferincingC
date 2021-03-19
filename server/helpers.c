@@ -20,30 +20,29 @@ int eventHandler (struct Server* sv, int connfd){
         
         
         if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
-            int ret = loginClient(sv, msg, connfd);
+            loginClient(sv, msg, connfd);
         } else if (msg.type == 2){
-            int ret = joinSession(msg);
+            createSession(sv, msg);
         } else if (msg.type == 3){
-            int ret = leaveSession(msg);
-        }
+            leaveSession(sv, msg);
+        } 
 
-        // testing the creation of clients and sessions 
-        //printf("%s has been entered into the server's client list!\n", sv->clients[0]->username);
+        // testing the creation of clients and sessions
+        for (int i = 0; sv->clients[i] != NULL; i++){
+            printf("%s is Client #%d in the TCserver!\n", sv->clients[i]->username, sv->clients[i]->cId);
+        } 
+        //
         //session_init(sv,msg, sv->clients[0]);
         //printf("%s has been initialized as a session!\n", sv->sessions[0]->sessionID);
 
         // writing an ack here for now. but response handler should call a response function that sends
         // the required ack packets as described in the document 
-        write(connfd, "ACK", sizeof(3));
+        
+        
     //}
 }
 
-
-
-
-
-
-
+// parse paclet into members and data 
 void processPacket(char* packet, struct Message* msg){
     unsigned int member = 1;
     char *type;   //member 1
@@ -95,12 +94,23 @@ void processPacket(char* packet, struct Message* msg){
 }
 
 
-/// this function will call the right function from server commands
-/// and return the correct corresponding ACK/NACK depending on the 
-/// return value of the server command 
 
+struct Client* clientLookup(struct Server* sv, char* username){ // hash later if we're nasty 
+    for (int i = 0; sv->clients[i] != NULL; i++){
+        if (strcmp(sv->clients[i]->username, username) == 0){
+            return sv->clients[i];
+        }
+    } 
+}
+
+struct Session* sessionLookup(struct Server* sv, char* sessionID){
+    return; 
+}
 
 void debugger(int code){
     printf("you made it here: %d\n", code);
 }
 
+void acknowledger(int connfd, char* ackToSend){
+    write(connfd, ackToSend, strlen(ackToSend));
+}

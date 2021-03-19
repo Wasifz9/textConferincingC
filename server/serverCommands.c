@@ -5,7 +5,7 @@ const char *acceptedClientIDs[] = {"wasifz9","nissar","instructor"}; // will nee
 const char *acceptedClientPasswords[] = {"password", "pathetic", "allknowing"}; // will need to code data structures 
 
 
-int loginClient(struct Server* sv, const struct Message msg, int connfd){
+void loginClient(struct Server* sv, const struct Message msg, int connfd){
     // check client credentials against authorized credentials
     // check client credentials against real time connected users 
     unsigned int member = 1;
@@ -43,10 +43,12 @@ int loginClient(struct Server* sv, const struct Message msg, int connfd){
                 printf("User has been authorized!\n");
                 /// init user and add too server struct lists 
                 // send appropriat LO_ACK
+                acknowledger(connfd, "LO_ACK");
                 client_init(sv, msg, connfd);
                 return 1;
             }else{
                 printf("Incorrect password for client!\n");
+                acknowledger(connfd, "LO_NACK");
                 // SEND LO_NAK
                 return 1;
             }
@@ -59,11 +61,17 @@ int loginClient(struct Server* sv, const struct Message msg, int connfd){
     
 }
 
-int joinSession(const struct Message msg){
+void createSession(struct Server* sv, const struct Message msg){
+    struct Client* cli;
+    cli = clientLookup(sv, msg.source);
+    session_init(sv, msg, cli);
+}
+
+void joinSession(struct Server* sv,const struct Message msg){
     return 0;
 }
 
-int leaveSession(const struct Message msg){
+void leaveSession(struct Server* sv,const struct Message msg){
     return 0;
 }
 
@@ -77,7 +85,8 @@ void client_init(struct Server* sv, const struct Message msg, int connfd){
     for (int i = 0; i<ACCEPTED_CLIENTS; i++){ // currently just filling next available spot 
         if (sv->clients[i] == NULL){
             sv->clients[i] = cli;
-            cli->cId = i; 
+            cli->cId = i;
+            break; 
         }
     }
 }
@@ -92,7 +101,8 @@ void session_init(struct Server* sv, const struct Message msg, struct Client* cl
     for (int i = 0; i<MAX_SESSIONS; i++){ // currently just filling next available spot 
         if (sv->sessions[i] == NULL){
             sv->sessions[i] = sess;
-            sess->sID = i; 
+            sess->sID = i;
+            break; 
         }
     }
 }

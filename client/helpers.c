@@ -27,7 +27,7 @@ int establishConnection(char* clientID, char* password, char* serverIP, char* se
         printf("connection with the server failed.\n");
         return -1; 
     }
-
+   
     char *loginData = malloc(sizeof(char) * 1100);
     asprintf(&loginData, "%s,%s", clientID, password);
 
@@ -48,10 +48,17 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
     write(connfd, serializedPacket, 2048);
     read(connfd, ackReceipt, sizeof(ackReceipt));
 
-    if (strcmp(ackReceipt, "ACK") == 0){
-        printf("Received Ack\n");
+
+    //whole receiving acks system needs to be written hard coding to LO_ACK 
+    //to confirm login and try to join session with global username 
+    if (strcmp(ackReceipt, "LO_ACK") == 0){
+        printf("Logged in!\n");
+        clientFD = connfd; 
+        loginFlag = 1; 
+        strcpy(username, source); 
         return 1;
-    } else {
+    } else if (strcmp(ackReceipt, "LO_NACK") == 0) {
+        printf("Log in failed.\n");
         return -1;
     }
 }

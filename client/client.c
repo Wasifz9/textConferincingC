@@ -21,6 +21,7 @@ char sessionID[100];
 int main (int argc, char *argv[]){
     printf("\nWelcome to TextConf by Wasif and Nissar!\n\n");
     printf("HelperBot: You can get started by typing 'help' or if you know your way around, get started!\n");
+    loginFlag = 0; 
     while (1){
         char command[50]; 
         prompter();

@@ -53,17 +53,20 @@ struct Message {
 };
 
 // server commands 
-int loginClient(struct Server* sv, const struct Message, int connfd);
-int logoutClient();
-int joinSession(const struct Message);
-int leaveSession(const struct Message);
-int newSession(int sessionID);
-int listStatus();
+void loginClient(struct Server* sv, const struct Message, int connfd);
+void logoutClient();
+void joinSession(struct Server* sv, const struct Message);
+void leaveSession(struct Server* sv, const struct Message);
+void createSession(struct Server* sv, const struct Message);
+void listStatus();
 
 // helpers
 int eventHandler(struct Server* sv, int connfd);
 void processPacket(char* packet, struct Message*);
 void debugger(int code);
+struct Client* clientLookup(struct Server* sv, char* username);
+struct Session* sessionLookup(struct Server* sv, char* sessionID);
+void acknowledger(int connfd, char* ackToSend);
 
 //server 
 struct Server* server_init();

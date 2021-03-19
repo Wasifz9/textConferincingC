@@ -19,6 +19,7 @@ int logout(){
 }
 
 int joinsession(char* sessionID){
+    
     return 0;
 }
 
@@ -27,6 +28,7 @@ int leavesession(){
 }
 
 int createsession(char* sessionID){
+    int ret = msgSender(2, strlen(sessionID), username, sessionID, clientFD);
     return 0;
 }
 

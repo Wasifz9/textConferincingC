@@ -47,19 +47,22 @@ int main (int argc, char *argv[]){
     else{
         printf("Server listening..\n"); 
     }
+
+    int connfd; 
         
+    while(1){
+        // declare and get length of client_addr
+        struct sockaddr_in client_addr;
+        int cli_length = sizeof(client_addr);
 
-    // declare and get length of client_addr
-    struct sockaddr_in client_addr;
-    int cli_length = sizeof(client_addr);
+        int connfd = accept(sock_fd, (struct sockaddr *)&client_addr, &cli_length); 
 
-    int connfd = accept(sock_fd, (struct sockaddr *)&client_addr, &cli_length); 
-
-    if (connfd < 0){
-        printf("couldn't accept.\n");
-        exit(1);
-    } else {
-        eventHandler(sv,connfd);
+        if (connfd < 0){
+            printf("couldn't accept.\n");
+            exit(1);
+        } else {
+            eventHandler(sv,connfd);
+        }
     }
 
     close(connfd);
