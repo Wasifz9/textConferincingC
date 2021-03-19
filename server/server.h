@@ -64,7 +64,7 @@ void createSession(const struct Message);
 void listStatus();
 
 // helpers
-int eventHandler(int connfd);
+int eventHandler(int* conn_fd);
 void processPacket(char* packet, struct Message*);
 void debugger(int code);
 int clientLookup(char* username);
@@ -79,7 +79,7 @@ struct Server* server_init();
 void client_init(const struct Message, int connfd);
 
 //session
-void session_init( const struct Message msg, struct Client* cli); 
+void session_init(const struct Message msg, struct Client* cli); 
 
 
 #endif

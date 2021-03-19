@@ -1,6 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
-LDFLAGS =
+CFLAGS = -Wall -pthread
 OBJFILES = server.o serverCommands.o helpers.o
 TARGET = TCserver
 all: $(TARGET)

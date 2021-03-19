@@ -61,12 +61,10 @@ int main (int argc, char *argv[]){
             printf("couldn't accept.\n");
             exit(1);
         } else {
-            /*pthread_t t; 
-            int *cli_connfd = malloc(sizeof(int);
+            pthread_t t; 
+            int *cli_connfd = malloc(sizeof(int));
             *cli_connfd = connfd;   
-            pthread_create(&t, NULL, eventHandler, cli_connfd);*/
-
-            eventHandler(connfd);
+            pthread_create(&t, NULL, eventHandler, cli_connfd);
         }
     }
 

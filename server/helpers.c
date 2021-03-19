@@ -1,6 +1,7 @@
 #include "server.h"
 
-int eventHandler (int connfd){ 
+int eventHandler (int *conn_fd){
+    int connfd = *conn_fd;
     while(1){
         printf("\nWaiting for new read in eventHandler.. \n");
         memset(&buff, 0, sizeof(buff)); 
@@ -102,7 +103,6 @@ void processPacket(char* packet, struct Message* msg){
     strcpy(msg->source,source); 
     
     /// based on type, we process data portion differently 
-    
     free(type);
     free(source);
     free(size);
