@@ -23,7 +23,9 @@ int joinsession(char* sessionID){
     return 0;
 }
 
-int leavesession(){
+int leavesession(char* sessionID){
+    printf("%s, %d\n",username, clientFD);
+    int ret = msgSender(3, strlen(sessionID), username, sessionID, clientFD);
     return 0;
 }
 

@@ -28,16 +28,22 @@ int eventHandler (struct Server* sv, int connfd){
         } 
 
         // testing the creation of clients and sessions
-        for (int i = 0; sv->clients[i] != NULL; i++){
-            printf("%s is Client #%d in the TCserver!\n", sv->clients[i]->username, sv->clients[i]->cId);
+        for (int i = 0; i < MAX_CLIENTS ; i++){
+            if(sv->clients[i] != NULL){
+                printf("%s is Client #%d in the TCserver!\n", sv->clients[i]->username, sv->clients[i]->cId);
+            }
         } 
         
-        for (int i = 0; sv->sessions[i] != NULL; i++){
-            printf("%s is session #%d in the TCserver!\n", sv->sessions[i]->sessionID, sv->sessions[i]->sID);
-            printf("Active members: \n");
-            for (int j = 0; sv->sessions[i]->clients[j] != NULL; j++){
-                printf("%s\n", sv->sessions[i]->clients[j]->username);
-            } 
+        for (int i = 0;i<MAX_SESSIONS; i++){
+            if (sv->sessions[i] != NULL){
+                printf("%s is session #%d in the TCserver!\n", sv->sessions[i]->sessionID, sv->sessions[i]->sID);
+                printf("Active members: \n");
+                for (int j = 0;j<MAX_SESSION_MEMS; j++){
+                    if(sv->sessions[i]->clients[j] != NULL){
+                        printf("%s\n", sv->sessions[i]->clients[j]->username);
+                    }
+                } 
+            }
         } 
 
         //
@@ -104,16 +110,40 @@ void processPacket(char* packet, struct Message* msg){
 
 
 
-struct Client* clientLookup(struct Server* sv, char* username){ // hash later if we're nasty 
-    for (int i = 0; sv->clients[i] != NULL; i++){
-        if (strcmp(sv->clients[i]->username, username) == 0){
-            return sv->clients[i];
+int clientLookup(struct Server* sv, char* username){ // hash later if we're nasty 
+    for (int i = 0; i < MAX_CLIENTS; i++){
+        if (sv->clients[i] != NULL){
+            if (strcmp(sv->clients[i]->username, username) == 0){
+                //return sv->clients[i];
+                return i;
+            }
         }
-    } 
+    }
+    return -1; 
 }
 
-struct Session* sessionLookup(struct Server* sv, char* sessionID){
-    return; 
+int sessClientLookup(struct Session* sess, char* username){ // hash later if we're nasty 
+    for (int i = 0; i < MAX_SESSION_MEMS; i++){
+        if (sess->clients[i] != NULL){
+            if (strcmp(sess->clients[i]->username, username) == 0){
+                //return sess->clients[i];
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+int sessionLookup(struct Server* sv, char* sessionID){
+    for (int i = 0; i < MAX_SESSIONS; i++){
+        if (sv->sessions[i] != NULL){
+            if (strcmp(sv->sessions[i]->sessionID, sessionID) == 0){
+                //return sv->sessions[i];
+                return i;
+            }
+        }
+    }
+    return -1;  
 }
 
 void debugger(int code){

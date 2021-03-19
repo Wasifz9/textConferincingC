@@ -64,8 +64,9 @@ void listStatus();
 int eventHandler(struct Server* sv, int connfd);
 void processPacket(char* packet, struct Message*);
 void debugger(int code);
-struct Client* clientLookup(struct Server* sv, char* username);
-struct Session* sessionLookup(struct Server* sv, char* sessionID);
+int clientLookup(struct Server* sv, char* username);
+int sessionLookup(struct Server* sv, char* sessionID);
+int sessClientLookup(struct Session* sess, char* username);
 void acknowledger(int connfd, char* ackToSend);
 
 //server 

@@ -44,7 +44,7 @@ int main (int argc, char *argv[]){
             joinsession(sessionID);
         }else if (strcmp(command, "/leavesession") == 0){
             printf("HelperBot: Leaving your session. \n");
-            leavesession();
+            leavesession(sessionID);
         }else if (strcmp(command, "/createsession") == 0){
             printf("HelperBot: Type in a valid session ID to start your session!\n");
             prompter();

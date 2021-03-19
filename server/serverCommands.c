@@ -57,22 +57,28 @@ void loginClient(struct Server* sv, const struct Message msg, int connfd){
     printf("User not found!\n");
     free(username);
     free(password);
-    return 1;
     
 }
 
 void createSession(struct Server* sv, const struct Message msg){
-    struct Client* cli;
-    cli = clientLookup(sv, msg.source);
-    session_init(sv, msg, cli);
+    int cIndex = clientLookup(sv, msg.source);
+    session_init(sv, msg, sv->clients[cIndex]);
 }
 
 void joinSession(struct Server* sv,const struct Message msg){
+    //struct Client* cli = clientLookup(sv, msg.source);
     return 0;
 }
 
 void leaveSession(struct Server* sv,const struct Message msg){
-    return 0;
+    int sIndex = sessionLookup(sv, msg.data);
+    int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
+    acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK");
+    sv->sessions[sIndex]->clients[scIndex] = NULL;
+    sv->sessions[sIndex]->memberCount--;
+    if (sv->sessions[sIndex]->memberCount == 0){
+        sv->sessions[sIndex] = NULL;
+    }
 }
 
 void client_init(struct Server* sv, const struct Message msg, int connfd){ 
