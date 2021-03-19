@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include<arpa/inet.h>
 #include <unistd.h> 
+#include <pthread.h>
 #define MAX_SESSION_MEMS 8
 #define MAX_SESSIONS_JOINED 3
 #define MAX_SESSIONS 8 
@@ -29,6 +30,8 @@ struct Server {
     int activeSessions;
     int activeClients; 
 };
+
+struct Server* sv;
 
 struct Session {
     unsigned int sID; // internal
@@ -53,19 +56,19 @@ struct Message {
 };
 
 // server commands 
-void loginClient(struct Server* sv, const struct Message, int connfd);
+void loginClient(const struct Message, int connfd);
 void logoutClient();
-void joinSession(struct Server* sv, const struct Message);
-void leaveSession(struct Server* sv, const struct Message);
-void createSession(struct Server* sv, const struct Message);
+void joinSession(const struct Message);
+void leaveSession(const struct Message);
+void createSession(const struct Message);
 void listStatus();
 
 // helpers
-int eventHandler(struct Server* sv, int connfd);
+int eventHandler(int connfd);
 void processPacket(char* packet, struct Message*);
 void debugger(int code);
-int clientLookup(struct Server* sv, char* username);
-int sessionLookup(struct Server* sv, char* sessionID);
+int clientLookup(char* username);
+int sessionLookup(char* sessionID);
 int sessClientLookup(struct Session* sess, char* username);
 void acknowledger(int connfd, char* ackToSend);
 
@@ -73,10 +76,10 @@ void acknowledger(int connfd, char* ackToSend);
 struct Server* server_init();
 
 //client
-void client_init(struct Server* sv, const struct Message, int connfd);
+void client_init(const struct Message, int connfd);
 
 //session
-void session_init(struct Server* sv, const struct Message msg, struct Client* cli); 
+void session_init( const struct Message msg, struct Client* cli); 
 
 
 #endif

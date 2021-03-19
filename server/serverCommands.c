@@ -5,7 +5,7 @@ const char *acceptedClientIDs[] = {"wasifz9","nissar","instructor"}; // will nee
 const char *acceptedClientPasswords[] = {"password", "pathetic", "allknowing"}; // will need to code data structures 
 
 
-void loginClient(struct Server* sv, const struct Message msg, int connfd){
+void loginClient(const struct Message msg, int connfd){
     // check client credentials against authorized credentials
     // check client credentials against real time connected users 
     unsigned int member = 1;
@@ -44,7 +44,7 @@ void loginClient(struct Server* sv, const struct Message msg, int connfd){
                 /// init user and add too server struct lists 
                 // send appropriat LO_ACK
                 
-                client_init(sv, msg, connfd);
+                client_init(msg, connfd);
                 return 1;
             }else{
                 printf("Incorrect password for client!\n");
@@ -60,18 +60,18 @@ void loginClient(struct Server* sv, const struct Message msg, int connfd){
     
 }
 
-void createSession(struct Server* sv, const struct Message msg){
-    int cIndex = clientLookup(sv, msg.source);
-    session_init(sv, msg, sv->clients[cIndex]);
+void createSession(const struct Message msg){
+    int cIndex = clientLookup(msg.source);
+    session_init(msg, sv->clients[cIndex]);
 }
 
-void joinSession(struct Server* sv,const struct Message msg){
+void joinSession(const struct Message msg){
     //struct Client* cli = clientLookup(sv, msg.source);
     return 0;
 }
 
-void leaveSession(struct Server* sv,const struct Message msg){
-    int sIndex = sessionLookup(sv, msg.data);
+void leaveSession(const struct Message msg){
+    int sIndex = sessionLookup(msg.data);
     int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
     acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK");
     sv->sessions[sIndex]->clients[scIndex] = NULL;
@@ -81,7 +81,7 @@ void leaveSession(struct Server* sv,const struct Message msg){
     }
 }
 
-void client_init(struct Server* sv, const struct Message msg, int connfd){ 
+void client_init(const struct Message msg, int connfd){ 
     // need to error check this (clients already logged in) cleints full
     struct Client* cli = malloc(sizeof(struct Client));
     strcpy(cli->username,msg.source);
@@ -98,7 +98,7 @@ void client_init(struct Server* sv, const struct Message msg, int connfd){
     }
 }
 
-void session_init(struct Server* sv, const struct Message msg, struct Client* cli){
+void session_init(const struct Message msg, struct Client* cli){
     // need to error check this (server ID already exists) severs full 
     struct Session* sess = malloc(sizeof(struct Session));
     strcpy(sess->sessionID,msg.data);

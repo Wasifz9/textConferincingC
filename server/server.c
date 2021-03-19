@@ -37,7 +37,7 @@ int main (int argc, char *argv[]){
         exit(1);
     }
 
-    struct Server* sv = server_init();
+    sv = server_init();
 
 
     if ((listen(sock_fd, 10)) != 0) { 
@@ -61,7 +61,12 @@ int main (int argc, char *argv[]){
             printf("couldn't accept.\n");
             exit(1);
         } else {
-            eventHandler(sv,connfd);
+            /*pthread_t t; 
+            int *cli_connfd = malloc(sizeof(int);
+            *cli_connfd = connfd;   
+            pthread_create(&t, NULL, eventHandler, cli_connfd);*/
+
+            eventHandler(connfd);
         }
     }
 

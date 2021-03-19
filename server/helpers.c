@@ -1,6 +1,6 @@
 #include "server.h"
 
-int eventHandler (struct Server* sv, int connfd){ 
+int eventHandler (int connfd){ 
     while(1){
         printf("\nWaiting for new read in eventHandler.. \n");
         memset(&buff, 0, sizeof(buff)); 
@@ -20,11 +20,11 @@ int eventHandler (struct Server* sv, int connfd){
         
         
         if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
-            loginClient(sv, msg, connfd);
+            loginClient(msg, connfd);
         } else if (msg.type == 2){
-            createSession(sv, msg);
+            createSession(msg);
         } else if (msg.type == 3){
-            leaveSession(sv, msg);
+            leaveSession(msg);
         } 
 
         // testing the creation of clients and sessions
@@ -110,7 +110,7 @@ void processPacket(char* packet, struct Message* msg){
 
 
 
-int clientLookup(struct Server* sv, char* username){ // hash later if we're nasty 
+int clientLookup(char* username){ // hash later if we're nasty 
     for (int i = 0; i < MAX_CLIENTS; i++){
         if (sv->clients[i] != NULL){
             if (strcmp(sv->clients[i]->username, username) == 0){
@@ -134,7 +134,7 @@ int sessClientLookup(struct Session* sess, char* username){ // hash later if we'
     return -1;
 }
 
-int sessionLookup(struct Server* sv, char* sessionID){
+int sessionLookup(char* sessionID){
     for (int i = 0; i < MAX_SESSIONS; i++){
         if (sv->sessions[i] != NULL){
             if (strcmp(sv->sessions[i]->sessionID, sessionID) == 0){
