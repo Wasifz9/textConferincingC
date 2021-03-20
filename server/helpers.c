@@ -26,7 +26,9 @@ int eventHandler (int *conn_fd){
             createSession(msg);
         } else if (msg.type == 3){
             leaveSession(msg);
-        } 
+        } else if (msg.type == 4){
+            joinSession(msg);
+        }
 
         // testing the creation of clients and sessions
         for (int i = 0; i < MAX_CLIENTS ; i++){

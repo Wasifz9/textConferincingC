@@ -19,8 +19,10 @@ int logout(){
 }
 
 int joinsession(char* sessionID){
-    
+    printf("%s, %d\n",username, clientFD);
+    int ret = msgSender(4, strlen(sessionID), username, sessionID, clientFD);
     return 0;
+    //return 0;
 }
 
 int leavesession(char* sessionID){

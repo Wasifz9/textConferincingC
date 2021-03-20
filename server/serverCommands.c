@@ -67,6 +67,24 @@ void createSession(const struct Message msg){
 
 void joinSession(const struct Message msg){
     //struct Client* cli = clientLookup(sv, msg.source);
+    int sIndex = sessionLookup(msg.data);
+    int cIndex = clientLookup(msg.source);
+    struct Client* cli = sv->clients[cIndex];
+
+    //int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
+    if (sIndex == -1 || cIndex == -1){
+        exit(1);
+    }
+
+    for (int i = 0; i<MAX_SESSION_MEMS; i++){ // currently just filling next available spot 
+        if (sv->sessions[sIndex]->clients[i] == NULL){
+            sv->sessions[sIndex]->clients[i] = cli;
+            sv->sessions[sIndex]->memberCount+=1;
+            acknowledger(cli->connfd, "JS_ACK");
+            break; 
+        }
+    }
+
     return 0;
 }
 
