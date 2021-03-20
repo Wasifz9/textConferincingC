@@ -34,7 +34,7 @@ int main (int argc, char *argv[]){
             prompter();
             scanf(" %s %s %s %s", clientID, password, serverIP, serverPort);
             login(clientID, password, serverIP, serverPort);
-        } else if (strcmp(command, "/logout") == 0){
+        } else if (strcmp(command, "/logout") == 0){ //send logout rquest and uninitialize the global variables
             printf("HelperBot: Logging you out of the server!\n");
             logout();
         }else if (strcmp(command, "/joinsession") == 0){
@@ -53,10 +53,14 @@ int main (int argc, char *argv[]){
         }else if (strcmp(command, "/list") == 0){
             printf("HelperBot: Listing connected clients and available sessions:\n");
             list();
-        }else if (strcmp(command, "/quit") == 0){
+        }else if (strcmp(command, "/quit") == 0){ // calls logout and quits program 
             printf("HelperBot: Quitting TextConf. See you soon!\n");
             exit(0);
-        } else {
+        } else if(strcmp(command, "<text>") == 0){
+            printf("HelperBot: Type a message to send to your session!\n");
+            texter();
+        }
+        else {
             printf("HelperBot: Unrecognized command! Please try again or type 'help' for a list of commands!\n");
         }
     }

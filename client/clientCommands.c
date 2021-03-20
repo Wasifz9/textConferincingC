@@ -67,3 +67,6 @@ void help(){
     printf("requrements: none\n\n");
 }
 
+void texter() {
+    
+}

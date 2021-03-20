@@ -4,7 +4,7 @@
 //WASIF GAY
 
 //wasifz9 password 128.100.13.132 5000 // only this one works everytime
-//nissar pathetic 128.100.13.132 5000  
+//  
 //instructor allknowing 128.100.13.132 5000
 #include <stdio.h>
 #include <string.h>
