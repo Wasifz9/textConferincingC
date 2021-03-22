@@ -6,7 +6,7 @@ char password[100];
 char serverIP[100];
 char serverPort[100];
 char sessionID[100];
-char text[200];
+//char text[200];
 // 128.100.13.132 
 ///////////
 // NOTES //
@@ -58,17 +58,43 @@ int main (int argc, char *argv[]){
             printf("HelperBot: Quitting TextConf. See you soon!\n");
             exit(0);
         } else if(strcmp(command, "<text>") == 0){
-            printf("HelperBot: Type a message to send to your session!\n");
-            prompter();
-            fgets(text,200,stdin);
+            //printf("HelperBot: Type a message to send to your session!\n");
+            //prompter();
+            //fgets(text,200,stdin);
+            char* text = "tester message I hope it works"; 
             texter(text);
         }
         else {
             printf("HelperBot: Unrecognized command! Please try again or type 'help' for a list of commands!\n");
         }
     }
-
-
-
     return -1;
+}
+
+void * messageListener(){
+    while(1){
+        memset(&buff, 0, sizeof(buff)); 
+        read(clientFD, buff, sizeof(buff));
+        if (strcmp(buff, "LO_NACK") == 0) {
+            printf("Log in failed.\n");
+        return -1;
+        } else if (strcmp(buff, "NS_ACK") == 0) {
+            printf("New session successfully created!\n");
+            return 1;
+        } else if (strcmp(buff, "JS_ACK") == 0){
+            printf("Session joined successfully!\n");
+            return 1;
+        } else if (strcmp(buff, "OUT_ACK") == 0){
+            printf("Succesfully logged out of the server!\n");
+            return 1; 
+        } else if (strcmp(buff, "TXT_ACK") == 0){
+            printf("Text sent\n!");
+            return 1;
+        } else {
+            printf("receiving: %s\n", buff);
+            struct Message msg;
+            processPacket(buff, &msg);
+            printf("\nNew message from %s: %s", msg.source, msg.data);
+        }
+    }
 }

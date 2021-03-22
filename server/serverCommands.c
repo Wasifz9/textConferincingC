@@ -79,6 +79,7 @@ void joinSession(const struct Message msg){
     for (int i = 0; i<MAX_SESSION_MEMS; i++){ // currently just filling next available spot 
         if (sv->sessions[sIndex]->clients[i] == NULL){
             sv->sessions[sIndex]->clients[i] = cli;
+            sv->sessions[sIndex]->clients[i]->sessionJoined = sIndex;
             sv->sessions[sIndex]->memberCount+=1;
             acknowledger(cli->connfd, "JS_ACK");
             break; 
@@ -89,6 +90,8 @@ void joinSession(const struct Message msg){
 }
 
 void leaveSession(const struct Message msg){
+    int cIndex = clientLookup(msg.source);
+    sv->clients[cIndex]->sessionJoined=-1;
     int sIndex = sessionLookup(msg.data);
     int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
     acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK");
@@ -152,6 +155,12 @@ void session_init(const struct Message msg, struct Client* cli){
     }
 }
 
-
-
-
+void groupMsg (const struct Message msg){
+    int cIndex = clientLookup(msg.source);
+    int sIndex = sv->clients[cIndex]->sessionJoined;
+    for (int j = 0;j<MAX_SESSION_MEMS; j++){
+        if (sv->sessions[sIndex]->clients[j] != NULL){
+            msgSender(10, msg.size, msg.source, msg.data, sv->sessions[sIndex]->clients[j]->connfd);
+        }
+    } 
+}

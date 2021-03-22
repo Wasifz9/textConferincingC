@@ -69,7 +69,7 @@ void help(){
 }
 
 void texter(char* text) {
-    debugger(2);
-    printf("%s\n", text);
-
+    //debugger(2);
+    //printf("%s\n", text);
+    int ret = msgSender(7, strlen(text), username, text, clientFD);
 }

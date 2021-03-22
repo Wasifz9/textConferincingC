@@ -31,7 +31,7 @@ void* eventHandler (int *conn_fd){
         } else if (msg.type == 6){
             logoutClient(msg);
         } else if (msg.type == 7){
-            
+            groupMsg(msg); 
         }
 
         printf("\n-- Server Status --\n\n");
@@ -162,4 +162,14 @@ void debugger(int code){
 
 void acknowledger(int connfd, char* ackToSend){
     write(connfd, ackToSend, strlen(ackToSend));
+}
+
+
+int msgSender (int type, unsigned int size, char* source, char * data, int connfd){
+    char ackReceipt[100];
+    char *serializedPacket = malloc(sizeof(char) * 1100);
+    asprintf(&serializedPacket, "%d:%d:%s:%s", type,
+        size, source, data);
+    //printf("message to send: %s\n", serializedPacket);
+    write(connfd, serializedPacket, strlen(serializedPacket));
 }

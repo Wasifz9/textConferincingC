@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <unistd.h> 
+#include <pthread.h>
 #define _GNU_SOURCE
 #define MAX_SESSION_MEMS 8
 #define MAX_SESSIONS_JOINED 3
@@ -27,6 +28,8 @@ struct Message{
 char username[MAX_CLIENT_ID]; 
 int clientFD; 
 int loginFlag;
+int sessID;
+
 
 void texter(char* text);
 int login(char *clientID, char *password, char *serverIP, char *serverPort);
@@ -42,6 +45,8 @@ char* msgReader(struct Message msg);
 int msgSender (int type, unsigned int size, char* source, char* data, int connfd);
 int establishConnection(char* clientID, char* password, char* serverIP, char* serverPort);
 char buff[1000]; 
+void* messageListener();
+void processPacket(char* packet, struct Message* msg);
 
 
 

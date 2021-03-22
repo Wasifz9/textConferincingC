@@ -47,38 +47,75 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
         size, source, data);
     //printf("message to send: %s\n", serializedPacket);
     write(connfd, serializedPacket, strlen(serializedPacket));
-    read(connfd, ackReceipt, sizeof(ackReceipt));
 
-
-    //whole receiving acks system needs to be written hard coding to LO_ACK 
-    //to confirm login and try to join session with global username 
-    if (strcmp(ackReceipt, "LO_ACK") == 0){
-        printf("Logged in!\n");
-        clientFD = connfd; 
-        loginFlag = 1; 
-        strcpy(username, source); 
-        return 1;
-    } else if (strcmp(ackReceipt, "LO_NACK") == 0) {
-        printf("Log in failed.\n");
-        return -1;
-    } else if (strcmp(ackReceipt, "NS_ACK") == 0) {
-        printf("New session successfully created!\n");
-        return 1;
-    } else if (strcmp(ackReceipt, "JS_ACK") == 0){
-        printf("Session joined successfully!\n");
-        return 1;
-    } else if (strcmp(ackReceipt, "OUT_ACK") == 0){
-        printf("Succesfully logged out of the server!");
-        return 1; 
+    if (type == 1){
+        read(connfd, ackReceipt, sizeof(ackReceipt));
+        if (strcmp(ackReceipt, "LO_ACK") == 0){
+            printf("Logged in!\n");
+            clientFD = connfd; 
+            loginFlag = 1; 
+            strcpy(username, source);
+            pthread_t t; 
+            pthread_create(&t, NULL, messageListener, NULL); 
+            return 1;
+        } 
     }
-    else {
-        return 0;
-    }
+    
+    return 1;
 }
 
 char* msgReader(struct Message msg){
     char* result = "some";
     return result;
+}
+
+void processPacket(char* packet, struct Message* msg){
+    unsigned int member = 1;
+    char *type;   //member 1
+    char *size;         //member 2
+    char *source;      //member 3
+
+    int i1 = 0; //first index of a member
+    int i2 = 0; //index of colon after the member 
+
+    for (; (i2 < 2000) && (member < 4); i2++)
+    {
+        if (packet[i2] == ':')
+        {
+            if (member == 1)    //total_frag
+            {
+                type = malloc(i2 - i1);
+                memcpy(type, packet + i1, i2 - i1);
+            }
+            else if (member == 2)    //size
+            {
+                size = malloc(i2 - i1);
+                memcpy(size, packet + i1, i2 - i1);
+            }
+            else if (member == 3)    //size
+            {
+                source = malloc(i2 - i1);
+                memcpy(source, packet + i1, i2 - i1);
+            }
+            else{printf("ERROR IN PROCESSPACKET.\n"); exit(1);}
+
+            i1 = i2 + 1;
+            member++;
+        }
+    }
+
+
+    
+    memset(&msg->data, 0, atoi(size)+1);
+    memcpy(&msg->data, packet + i1, atoi(size));
+    msg->type = atoi(type);
+    msg->size = atoi(size);
+    strcpy(msg->source,source); 
+    
+    /// based on type, we process data portion differently 
+    free(type);
+    free(source);
+    free(size);
 }
 
 

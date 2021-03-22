@@ -7,7 +7,7 @@
 
 //wasifz9 password 128.100.13.132 5000 // only this one works everytime
 //nissar pathetic 128.100.13.132 5000 
-//instructo0r allknowing 128.100.13.132 500
+//instructor allknowing 128.100.13.132 5000
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
@@ -63,6 +63,7 @@ void logoutClient(const struct Message);
 void joinSession(const struct Message);
 void leaveSession(const struct Message);
 void createSession(const struct Message);
+void groupMsg(const struct Message);
 void listStatus();
 
 // helpers
@@ -73,6 +74,7 @@ int clientLookup(char* username);
 int sessionLookup(char* sessionID);
 int sessClientLookup(struct Session* sess, char* username);
 void acknowledger(int connfd, char* ackToSend);
+int msgSender (int type, unsigned int size, char* source, char * data, int connfd);
 
 //server 
 struct Server* server_init();
