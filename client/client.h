@@ -28,7 +28,7 @@ char username[MAX_CLIENT_ID];
 int clientFD; 
 int loginFlag;
 
-void texter();
+void texter(char* text);
 int login(char *clientID, char *password, char *serverIP, char *serverPort);
 int logout();
 int joinsession(char* sessionID);

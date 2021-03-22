@@ -1,6 +1,6 @@
 #include "server.h"
 
-int eventHandler (int *conn_fd){
+void* eventHandler (int *conn_fd){
     int connfd = *conn_fd;
     while(1){
         printf("\nWaiting for new read in eventHandler.. \n");
@@ -17,7 +17,7 @@ int eventHandler (int *conn_fd){
         printf("\n-- Message --\n");
         printf("type = %d | size = %d | sourceID = %s\n",
         msg.type, msg.size, msg.source);
-        printf("data: %s\n", msg.data);
+        printf("data: %s\n\n", msg.data);
         
         
         if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
@@ -28,7 +28,14 @@ int eventHandler (int *conn_fd){
             leaveSession(msg);
         } else if (msg.type == 4){
             joinSession(msg);
+        } else if (msg.type == 6){
+            logoutClient(msg);
+        } else if (msg.type == 7){
+            
         }
+
+        printf("\n-- Server Status --\n\n");
+        printf("-Client List-\n");
 
         // testing the creation of clients and sessions
         for (int i = 0; i < MAX_CLIENTS ; i++){
@@ -36,27 +43,28 @@ int eventHandler (int *conn_fd){
                 printf("%s is Client #%d in the TCserver!\n", sv->clients[i]->username, sv->clients[i]->cId);
             }
         } 
-        
+
+        printf("\n-Session List-\n");
+
         for (int i = 0;i<MAX_SESSIONS; i++){
             if (sv->sessions[i] != NULL){
+                if (sv->sessions[i]->memberCount == 0){
+                    sv->sessions[i] = NULL;
+                    continue;
+                }
                 printf("%s is session #%d in the TCserver!\n", sv->sessions[i]->sessionID, sv->sessions[i]->sID);
                 printf("Active members: \n");
                 for (int j = 0;j<MAX_SESSION_MEMS; j++){
                     if(sv->sessions[i]->clients[j] != NULL){
                         printf("%s\n", sv->sessions[i]->clients[j]->username);
                     }
-                } 
+                }
+                printf("\n");
             }
         } 
 
-        //
-        //session_init(sv,msg, sv->clients[0]);
-        //printf("%s has been initialized as a session!\n", sv->sessions[0]->sessionID);
-
-        // writing an ack here for now. but response handler should call a response function that sends
-        // the required ack packets as described in the document 
-        
-        
+        if (msg.type == 6)
+            return;
     }
 }
 

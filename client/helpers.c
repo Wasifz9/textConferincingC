@@ -67,6 +67,9 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
     } else if (strcmp(ackReceipt, "JS_ACK") == 0){
         printf("Session joined successfully!\n");
         return 1;
+    } else if (strcmp(ackReceipt, "OUT_ACK") == 0){
+        printf("Succesfully logged out of the server!");
+        return 1; 
     }
     else {
         return 0;

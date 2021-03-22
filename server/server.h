@@ -1,11 +1,13 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+// start with logout function which is segfaulting somwhere
+
 //WASIF GAY
 
 //wasifz9 password 128.100.13.132 5000 // only this one works everytime
-//  
-//instructor allknowing 128.100.13.132 5000
+//nissar pathetic 128.100.13.132 5000 
+//instructo0r allknowing 128.100.13.132 500
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
@@ -57,14 +59,14 @@ struct Message {
 
 // server commands 
 void loginClient(const struct Message, int connfd);
-void logoutClient();
+void logoutClient(const struct Message);
 void joinSession(const struct Message);
 void leaveSession(const struct Message);
 void createSession(const struct Message);
 void listStatus();
 
 // helpers
-int eventHandler(int* conn_fd);
+void* eventHandler(int* conn_fd);
 void processPacket(char* packet, struct Message*);
 void debugger(int code);
 int clientLookup(char* username);

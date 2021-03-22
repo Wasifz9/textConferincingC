@@ -15,24 +15,25 @@ int login (char* clientID, char* password, char* serverIP, char* serverPort){
 }
 
 int logout(){
+    int ret = msgSender(6, 0, username, NULL, clientFD);
     return 0;
 }
 
 int joinsession(char* sessionID){
-    printf("%s, %d\n",username, clientFD);
+    //printf("%s, %d\n",username, clientFD);
     int ret = msgSender(4, strlen(sessionID), username, sessionID, clientFD);
     return 0;
     //return 0;
 }
 
 int leavesession(char* sessionID){
-    printf("%s, %d\n",username, clientFD);
+    //printf("%s, %d\n",username, clientFD);
     int ret = msgSender(3, strlen(sessionID), username, sessionID, clientFD);
     return 0;
 }
 
 int createsession(char* sessionID){
-    printf("%s, %d\n",username, clientFD);
+    //printf("%s, %d\n",username, clientFD);
     int ret = msgSender(2, strlen(sessionID), username, sessionID, clientFD);
     return 0;
 }
@@ -67,6 +68,8 @@ void help(){
     printf("requrements: none\n\n");
 }
 
-void texter() {
-    
+void texter(char* text) {
+    debugger(2);
+    printf("%s\n", text);
+
 }

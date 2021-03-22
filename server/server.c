@@ -78,11 +78,11 @@ struct Server* server_init(){
 	sv = malloc(sizeof(struct Server));
     sv->activeSessions = 0;
     sv->activeClients = 0;
-    /*
+    
     for(int i = 0; i < MAX_SESSIONS ; ++i)
-        sv->sessions[i] = (struct Session*)malloc(sizeof(struct Session));
-    for(int i = 0; i < MAX_SESSIONS ; ++i)
-        sv->clients[i] = (struct Client*)malloc(sizeof(struct Client));*/
+        sv->sessions[i] = NULL;
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+        sv->clients[i] = NULL;
     
     return sv;
 }

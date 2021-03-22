@@ -35,7 +35,7 @@ void loginClient(const struct Message msg, int connfd){
         }
     }
 
-    printf("A client is trying to join with the credentals: \n username: %s\n password: %s\n", username, password);
+    //printf("A client is trying to join with the credentals: \n username: %s\n password: %s\n", username, password);
 
     for (int i = 0; i < ACCEPTED_CLIENTS; i++){
         if (strcmp(acceptedClientIDs[i], username) == 0){
@@ -97,6 +97,25 @@ void leaveSession(const struct Message msg){
     if (sv->sessions[sIndex]->memberCount == 0){
         sv->sessions[sIndex] = NULL;
     }
+}
+
+void logoutClient(const struct Message msg){
+    int cIndex = clientLookup(msg.source);
+    acknowledger(sv->clients[cIndex]->connfd, "OUT_ACK");  
+    sv->clients[cIndex] = NULL;
+    
+    for (int i = 0;i<MAX_SESSIONS; i++){
+        if (sv->sessions[i] != NULL){
+            for (int j = 0;j<MAX_SESSION_MEMS; j++){
+                if (sv->sessions[i]->clients[j] != NULL){
+                    if(strcmp(sv->sessions[i]->clients[j]->username,msg.source) == 0){
+                        sv->sessions[i]->memberCount--;
+                        sv->sessions[i]->clients[j] = NULL; 
+                    }
+                }
+            } 
+        }
+    }  
 }
 
 void client_init(const struct Message msg, int connfd){ 

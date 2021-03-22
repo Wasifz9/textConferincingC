@@ -6,6 +6,7 @@ char password[100];
 char serverIP[100];
 char serverPort[100];
 char sessionID[100];
+char text[200];
 // 128.100.13.132 
 ///////////
 // NOTES //
@@ -25,7 +26,7 @@ int main (int argc, char *argv[]){
     while (1){
         char command[50]; 
         prompter();
-        scanf("%s", &command);
+        scanf("%s",command);
         printf("\n");
         if (strcmp(command, "help") == 0){
             help();
@@ -34,7 +35,7 @@ int main (int argc, char *argv[]){
             prompter();
             scanf(" %s %s %s %s", clientID, password, serverIP, serverPort);
             login(clientID, password, serverIP, serverPort);
-        } else if (strcmp(command, "/logout") == 0){ //send logout rquest and uninitialize the global variables
+        } else if (strcmp(command, "/logout") == 0){ //send logout request and uninitialize the global variables
             printf("HelperBot: Logging you out of the server!\n");
             logout();
         }else if (strcmp(command, "/joinsession") == 0){
@@ -58,7 +59,9 @@ int main (int argc, char *argv[]){
             exit(0);
         } else if(strcmp(command, "<text>") == 0){
             printf("HelperBot: Type a message to send to your session!\n");
-            texter();
+            prompter();
+            fgets(text,200,stdin);
+            texter(text);
         }
         else {
             printf("HelperBot: Unrecognized command! Please try again or type 'help' for a list of commands!\n");
