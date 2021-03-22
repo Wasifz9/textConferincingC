@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-// start with logout function which is segfaulting somwhere
+//START HERE: the owner of the chat (creator) cant send texts.  
 
 //WASIF GAY
 

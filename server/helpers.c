@@ -40,7 +40,8 @@ void* eventHandler (int *conn_fd){
         // testing the creation of clients and sessions
         for (int i = 0; i < MAX_CLIENTS ; i++){
             if(sv->clients[i] != NULL){
-                printf("%s is Client #%d in the TCserver!\n", sv->clients[i]->username, sv->clients[i]->cId);
+                printf("%s is Client #%d in the TCserver and has connfd: %d!\n", 
+                    sv->clients[i]->username, sv->clients[i]->cId, sv->clients[i]->connfd);
             }
         } 
 

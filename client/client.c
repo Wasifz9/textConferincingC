@@ -77,24 +77,29 @@ void * messageListener(){
         read(clientFD, buff, sizeof(buff));
         if (strcmp(buff, "LO_NACK") == 0) {
             printf("Log in failed.\n");
-        return -1;
+            prompter();
         } else if (strcmp(buff, "NS_ACK") == 0) {
             printf("New session successfully created!\n");
-            return 1;
+            prompter();
         } else if (strcmp(buff, "JS_ACK") == 0){
             printf("Session joined successfully!\n");
-            return 1;
+            prompter();
         } else if (strcmp(buff, "OUT_ACK") == 0){
             printf("Succesfully logged out of the server!\n");
-            return 1; 
+            prompter();
+            return;
         } else if (strcmp(buff, "TXT_ACK") == 0){
             printf("Text sent\n!");
-            return 1;
+            prompter();
+        } else if (strcmp(buff, "LS_ACK") == 0){
+            printf("Left session!\n");
+            prompter();
         } else {
             printf("receiving: %s\n", buff);
             struct Message msg;
             processPacket(buff, &msg);
             printf("\nNew message from %s: %s", msg.source, msg.data);
+            prompter();
         }
     }
 }
