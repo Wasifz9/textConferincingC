@@ -35,26 +35,36 @@ void loginClient(const struct Message msg, int connfd){
         }
     }
 
+    for (int i = 0; i < MAX_CLIENTS; i++){
+        if (sv->clients[i] != NULL){ 
+            if (strcmp(sv->clients[i]->username, username) == 0){
+                acknowledger(connfd, "LO_NACK", "This username is already logged in!");
+                return;
+            }
+        }
+    }
+
     //printf("A client is trying to join with the credentals: \n username: %s\n password: %s\n", username, password);
 
     for (int i = 0; i < ACCEPTED_CLIENTS; i++){
         if (strcmp(acceptedClientIDs[i], username) == 0){
             if (strcmp(acceptedClientPasswords[i], password) == 0){ // need to send the prints as LO_NAKS
-                printf("User has been authorized!\n");
+                //printf("User has been authorized!\n");
                 /// init user and add too server struct lists 
                 // send appropriat LO_ACK
                 
                 client_init(msg, connfd);
-                return 1;
+                return;
             }else{
-                printf("Incorrect password for client!\n");
-                acknowledger(connfd, "LO_NACK");
+                //printf("Incorrect password for client!\n");
+                acknowledger(connfd, "LO_NACK", "Incorrect password for client!");
                 // SEND LO_NAK
-                return 1;
+                return;
             }
         }
     }
-    printf("User not found!\n");
+    //printf("User not found!\n");
+    acknowledger(connfd, "LO_NACK", "This username isn't registered in the server!");
     free(username);
     free(password);
     
@@ -73,20 +83,23 @@ void joinSession(const struct Message msg){
 
     //int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
     if (sIndex == -1 || cIndex == -1){
-        exit(1);
+        acknowledger(cli->connfd, "JS_NACK", "This session doesn't exist!"); //session doesnt exist
+        return;  
     }
 
     for (int i = 0; i<MAX_SESSION_MEMS; i++){ // currently just filling next available spot 
         if (sv->sessions[sIndex]->clients[i] == NULL){
             sv->sessions[sIndex]->clients[i] = cli;
             sv->sessions[sIndex]->clients[i]->sessionJoined = sIndex;
+            sv->clients[sIndex]->sessionJoined = sIndex;
             sv->sessions[sIndex]->memberCount+=1;
-            acknowledger(cli->connfd, "JS_ACK");
-            break; 
+            acknowledger(cli->connfd, "JS_ACK", NULL);
+            return;  
         }
     }
 
-    return 0;
+    acknowledger(cli->connfd, "JS_NACK", "The session is full!"); //session full 
+    return;
 }
 
 void leaveSession(const struct Message msg){
@@ -94,7 +107,7 @@ void leaveSession(const struct Message msg){
     sv->clients[cIndex]->sessionJoined=-1;
     int sIndex = sessionLookup(msg.data);
     int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
-    acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK");
+    acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK", NULL);
     sv->sessions[sIndex]->clients[scIndex] = NULL;
     sv->sessions[sIndex]->memberCount--;
     if (sv->sessions[sIndex]->memberCount == 0){
@@ -103,22 +116,34 @@ void leaveSession(const struct Message msg){
 }
 
 void logoutClient(const struct Message msg){
+    //debugger(2);
     int cIndex = clientLookup(msg.source);
-    acknowledger(sv->clients[cIndex]->connfd, "OUT_ACK");  
-    sv->clients[cIndex] = NULL;
-    
+    if (cIndex == -1){
+        printf("Client doesnt exist.\n");
+        return;  
+    }
+    acknowledger(sv->clients[cIndex]->connfd, "OUT_ACK", NULL);  
+    sv->clients[cIndex] = NULL;  
+    //debugger(3);    
+
     for (int i = 0;i<MAX_SESSIONS; i++){
+        //debugger(4);
         if (sv->sessions[i] != NULL){
+            //debugger(5);
             for (int j = 0;j<MAX_SESSION_MEMS; j++){
+                //debugger(6);
                 if (sv->sessions[i]->clients[j] != NULL){
+                    //debugger(7);
                     if(strcmp(sv->sessions[i]->clients[j]->username,msg.source) == 0){
+                        //debugger(8);
                         sv->sessions[i]->memberCount--;
                         sv->sessions[i]->clients[j] = NULL; 
                     }
                 }
             } 
         }
-    }  
+    }
+
 }
 
 void client_init(const struct Message msg, int connfd){ 
@@ -132,10 +157,12 @@ void client_init(const struct Message msg, int connfd){
         if (sv->clients[i] == NULL){
             sv->clients[i] = cli;
             cli->cId = i;
-            acknowledger(cli->connfd, "LO_ACK");
-            break; 
+            acknowledger(cli->connfd, "LO_ACK", "You've been authorized and logged in!");
+            return; 
         }
     }
+
+    acknowledger(cli->connfd, "LO_NACK", "Server is full!");
 }
 
 void session_init(const struct Message msg, struct Client* cli){
@@ -144,13 +171,18 @@ void session_init(const struct Message msg, struct Client* cli){
     strcpy(sess->sessionID,msg.data);
     sess->memberCount = 1; 
     sess->clients[0] = cli;
-    
+
+    for(int i = 1; i<MAX_SESSION_MEMS; i++){
+        sess->clients[i] = NULL;
+    }
+
     for (int i = 0; i<MAX_SESSIONS; i++){ // currently just filling next available spot 
         if (sv->sessions[i] == NULL){
             sv->sessions[i] = sess;
             sess->sID = i;
-            acknowledger(cli->connfd, "NS_ACK");
-            break; 
+            cli->sessionJoined = i;
+            acknowledger(cli->connfd, "NS_ACK", NULL);
+            return;
         }
     }
 }
@@ -159,8 +191,79 @@ void groupMsg (const struct Message msg){
     int cIndex = clientLookup(msg.source);
     int sIndex = sv->clients[cIndex]->sessionJoined;
     for (int j = 0;j<MAX_SESSION_MEMS; j++){
-        if (sv->sessions[sIndex]->clients[j] != NULL){
+        if (sv->sessions[sIndex]->clients[j] != NULL && 
+            strcmp(sv->sessions[sIndex]->clients[j]->username, msg.source) != 0)
+        {
             msgSender(10, msg.size, msg.source, msg.data, sv->sessions[sIndex]->clients[j]->connfd);
         }
     } 
+}
+
+void listStatus(const struct Message msg){
+        //Initialize Client List
+    int MAX_LENGTH_CLIST = MAX_CLIENTS * MAX_CLIENT_ID * 2;
+    char clist[MAX_LENGTH_CLIST];
+    clist[0] = '\0';
+    for (int i = 1; i < MAX_LENGTH_CLIST; i++)
+        clist[i] = NULL;
+
+    //Initialize Session List
+    int MAX_LENGTH_SLIST = MAX_SESSIONS * MAX_SESSION_NAME * 2;
+    char slist[MAX_LENGTH_SLIST];
+    slist[0] = '\0';
+    for (int i = 1; i < MAX_LENGTH_SLIST; i++)
+        slist[i] = NULL;
+
+    //Helper Strings
+    char SPACE[2] = {' ', '\0'};
+    char TAB[6] = {' ', ' ', ' ', ' ', ' ', '\0'};
+    char CLIENTS[] = "Clients:  ";
+    char SESSIONS[] = "Sessions:  ";
+    char NO_CLIENTS[] = "No clients online";
+    char NO_SESSIONS[] = "No sessions online";
+
+    //Populate Client List
+    strcat(clist, CLIENTS);
+    int counter_c = 0;  //used to check if no clients
+    for (int i = 0; i < MAX_CLIENTS ; i++){
+        if(sv->clients[i] != NULL){
+            strcat(clist, sv->clients[i]->username);
+            strcat(clist, SPACE);
+            counter_c++;
+        }
+    }
+    if (counter_c == 0)
+        strcat(clist, NO_CLIENTS);
+    
+    //Populate Session List
+    strcat(slist, SESSIONS);
+    int counter_s = 0;  //used to check if no sessions
+    for (int i = 0; i < MAX_SESSIONS; i++){
+        if(sv->sessions[i] != NULL){
+            strcat(slist, sv->sessions[i]->sessionID);
+            strcat(slist, SPACE);
+            counter_s++;
+        }
+    }
+    if (counter_s == 0)
+        strcat(slist, NO_SESSIONS);
+
+    //String to send over to client
+    int MAX_LENGTH_LIST = MAX_LENGTH_CLIST + MAX_LENGTH_SLIST;
+    char list[MAX_LENGTH_LIST];
+    list[0] = '\0';
+    for (int i = 1; i < MAX_LENGTH_LIST; i++)
+        list[i] = NULL;
+    strcat(list, clist);
+    strcat(list, TAB);
+    strcat(list, slist);
+
+    //For debugging server-side
+    //printf("clients: %s\n", clist);
+    //printf("sessions: %s\n", slist);
+    int cIndex = clientLookup(msg.source);
+    acknowledger(sv->clients[cIndex]->connfd, "QU_ACK", list);
+    //printf("overall: %s\n", list);
+
+    return;
 }

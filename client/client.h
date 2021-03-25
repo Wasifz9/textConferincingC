@@ -29,6 +29,7 @@ char username[MAX_CLIENT_ID];
 int clientFD; 
 int loginFlag;
 int sessID;
+int sessFlag;
 
 
 void texter(char* text);

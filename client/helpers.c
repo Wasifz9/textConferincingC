@@ -1,7 +1,7 @@
 #include "client.h"
 
 int establishConnection(char* clientID, char* password, char* serverIP, char* serverPort){
-    printf("Attempting to establish connection...\n");
+    //printf("Attempting to establish connection...\n");
     
     int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
     //socket() returns -1 on failure
@@ -49,17 +49,14 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
     write(connfd, serializedPacket, strlen(serializedPacket));
 
     if (type == 1){
-        read(connfd, ackReceipt, sizeof(ackReceipt));
-        if (strcmp(ackReceipt, "LO_ACK") == 0){
-            printf("Logged in!\n");
-            clientFD = connfd; 
-            loginFlag = 1; 
+            clientFD = connfd;
+            memset(username, 0, sizeof(username));
             strcpy(username, source);
             pthread_t t; 
             pthread_create(&t, NULL, messageListener, NULL); 
             return 1;
-        } 
-    }
+    } 
+    
     
     return 1;
 }

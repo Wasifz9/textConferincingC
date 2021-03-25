@@ -3,7 +3,7 @@
 void* eventHandler (int *conn_fd){
     int connfd = *conn_fd;
     while(1){
-        printf("\nWaiting for new read in eventHandler.. \n");
+        //printf("\nWaiting for new read in eventHandler.. \n");
         memset(&buff, 0, sizeof(buff)); 
         read(connfd, buff, sizeof(buff));
     
@@ -11,15 +11,18 @@ void* eventHandler (int *conn_fd){
         // currently thinking to do most error handling on client side (size length etc)
         // so we dont have to send too many nacks. nacks only if the networks part doesnt work for
         // some reason 
+
         struct Message msg;
         processPacket(buff, &msg); 
         
-        printf("\n-- Message --\n");
+        printf("\n|||||||| Message Received ||||||||\n\n");
+        //printf("Raw data: %s\n", buff);
         printf("type = %d | size = %d | sourceID = %s\n",
         msg.type, msg.size, msg.source);
-        printf("data: %s\n\n", msg.data);
+        printf("data: %s\n", msg.data);
         
-        
+        printf("\n--- Server Output ---\n");
+        printf("%s: ", msg.source);
         if (msg.type == 1){ // can set up the types to corresoond to certain numbers in header file
             loginClient(msg, connfd);
         } else if (msg.type == 2){
@@ -28,14 +31,17 @@ void* eventHandler (int *conn_fd){
             leaveSession(msg);
         } else if (msg.type == 4){
             joinSession(msg);
-        } else if (msg.type == 6){
+        } else if (msg.type == 8){
+            listStatus(msg);   
+        }else if (msg.type == 6){
             logoutClient(msg);
         } else if (msg.type == 7){
-            groupMsg(msg); 
+            groupMsg(msg);
+            printf("Sending text -> %s\n", msg.data);
         }
 
-        printf("\n-- Server Status --\n\n");
-        printf("-Client List-\n");
+        printf("\n-------- Server Status --------\n\n");
+        printf("- Client List -\n");
 
         // testing the creation of clients and sessions
         for (int i = 0; i < MAX_CLIENTS ; i++){
@@ -45,7 +51,7 @@ void* eventHandler (int *conn_fd){
             }
         } 
 
-        printf("\n-Session List-\n");
+        printf("\n- Session List -\n");
 
         for (int i = 0;i<MAX_SESSIONS; i++){
             if (sv->sessions[i] != NULL){
@@ -64,8 +70,13 @@ void* eventHandler (int *conn_fd){
             }
         } 
 
-        if (msg.type == 6)
+        printf("|||||||||||||||||||||||||||||||||\n\n");
+
+        if (msg.type == 6){
             return;
+        }
+
+        
     }
 }
 
@@ -111,6 +122,9 @@ void processPacket(char* packet, struct Message* msg){
     memcpy(&msg->data, packet + i1, atoi(size));
     msg->type = atoi(type);
     msg->size = atoi(size);
+    if (msg->type > 9){ 
+        msg->type=msg->type/10; 
+    }
     strcpy(msg->source,source); 
     
     /// based on type, we process data portion differently 
@@ -124,7 +138,9 @@ void processPacket(char* packet, struct Message* msg){
 int clientLookup(char* username){ // hash later if we're nasty 
     for (int i = 0; i < MAX_CLIENTS; i++){
         if (sv->clients[i] != NULL){
+            //debugger(123);
             if (strcmp(sv->clients[i]->username, username) == 0){
+                //debugger(234);
                 //return sv->clients[i];
                 return i;
             }
@@ -161,8 +177,45 @@ void debugger(int code){
     printf("you made it here: %d\n", code);
 }
 
-void acknowledger(int connfd, char* ackToSend){
-    write(connfd, ackToSend, strlen(ackToSend));
+void acknowledger(int connfd, char* ackToSend, char* error){
+    int type;
+    int size = 0;
+
+    if (strcmp(ackToSend, "LO_ACK") == 0) { // 1
+        type = 1;
+        size = strlen(error);
+        printf("Logged in!\n");
+    } 
+    if (strcmp(ackToSend, "LO_NACK") == 0) { // 2
+        printf("Couldn't login: %s\n", error);
+        type = 2;
+        size = strlen(error); 
+    } else if (strcmp(ackToSend, "NS_ACK") == 0) { // 3 
+        printf("Session created!\n");
+        type = 3;
+    } else if (strcmp(ackToSend, "JS_ACK") == 0){ // 4
+        printf("Joined session!\n");
+        type = 4; 
+    } else if (strcmp(ackToSend, "JS_NACK") == 0){ // 5 
+        printf("Couldn't join session: %s\n", error);
+        type = 5;
+        size = strlen(error); 
+    } else if (strcmp(ackToSend, "LS_ACK") == 0){ // 6
+        printf("Left session!\n");
+        type = 6;
+    } else if (strcmp(ackToSend, "OUT_ACK") == 0){ // 7
+        printf("Logging out!\n");
+        type = 7;
+    } else if (strcmp(ackToSend, "TXT_ACK") == 0){ // not doing anything rn
+        printf("Text sent\n!");
+    } else if (strcmp(ackToSend, "QU_ACK") == 0){
+        printf("Sending server status!\n");
+        type = 8; 
+        size = strlen(error);
+    }
+
+    msgSender (type, size,"TCServer", error, connfd);
+    //write(connfd, ackToSend, strlen(ackToSend));
 }
 
 

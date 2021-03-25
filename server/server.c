@@ -64,7 +64,7 @@ int main (int argc, char *argv[]){
             pthread_t t; 
             int *cli_connfd = malloc(sizeof(int));
             *cli_connfd = connfd;   
-            pthread_create(&t, NULL, eventHandler, cli_connfd);
+            pthread_create(&t, NULL, eventHandler, cli_connfd); //new threads run event handler with variable cli_connfd
         }
     }
 

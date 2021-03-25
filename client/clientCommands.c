@@ -9,8 +9,6 @@ int login (char* clientID, char* password, char* serverIP, char* serverPort){
 
     //Establish connection with server based on credentials from user
     int ret = establishConnection(clientID, password, serverIP, serverPort);
-
-
     return 0;
 }
 
@@ -39,6 +37,7 @@ int createsession(char* sessionID){
 }
 
 int list(){
+    int ret = msgSender(8, 0, username, NULL, clientFD);
     return 0;
 }
 
