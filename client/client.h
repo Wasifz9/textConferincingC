@@ -10,7 +10,7 @@
 #include <pthread.h>
 #define _GNU_SOURCE
 #define MAX_SESSION_MEMS 8
-#define MAX_SESSIONS_JOINED 3
+#define MAX_SESSIONS_JOINED 2
 #define MAX_SESSIONS 8 
 #define MAX_CLIENTS 32 
 #define MAX_CLIENT_ID 20
@@ -30,8 +30,13 @@ int clientFD;
 int loginFlag;
 int sessID;
 int sessFlag;
+int invFlag; 
+char* invSession[100]; 
 
+char *textCommands[MAX_SESSIONS_JOINED];
+char *joinedSessions[MAX_SESSIONS_JOINED];
 
+void clientSessions(const struct Message);
 void texter(char* text);
 int login(char *clientID, char *password, char *serverIP, char *serverPort);
 int logout();
@@ -48,7 +53,7 @@ int establishConnection(char* clientID, char* password, char* serverIP, char* se
 char buff[1000]; 
 void* messageListener();
 void processPacket(char* packet, struct Message* msg);
-
+void invite(char* recipient, char* session);
 
 
 #endif

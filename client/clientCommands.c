@@ -41,6 +41,12 @@ int list(){
     return 0;
 }
 
+void invite(char* recipient, char* session){
+    char* invData = malloc(sizeof(char) * 1100);
+    asprintf(&invData, "%s|%s", recipient, session);
+    int ret = msgSender(0, strlen(invData), username, invData, clientFD);
+}
+
 void prompter (){
     printf("\n>> ");
 }

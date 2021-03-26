@@ -7,12 +7,20 @@ char serverIP[100];
 char serverPort[100];
 char sessionID[100];
 char text[200];
+char toinvite[200];
+char invSess[100]; 
+
+char *textCommands[MAX_SESSIONS_JOINED] = {"/","/"};
+char *joinedSessions[MAX_SESSIONS_JOINED] = {NULL, NULL}; 
+
 // 128.100.13.132 
 ///////////
 // NOTES //
 ///////////
 
 // check input length and make sure char buffers dont overflow!
+// for multiple sessions, type <sessionID>: yo  
+
 
 // client interace  
 int main (int argc, char *argv[]){
@@ -44,46 +52,63 @@ int main (int argc, char *argv[]){
             } else {
                 printf("HelperBot: Login before logging out\n");
             }
-        }else if (strcmp(command, "/joinsession") == 0){
+        } else if (strcmp(command, "/joinsession") == 0){
             scanf(" %s", sessionID);
-            if (sessFlag == 0){
+            //if (sessFlag == 0){
                 //printf("Type in your session ID and join your session!\n");
                 //prompter();
                 
                 joinsession(sessionID);
-            }else {
-                printf("HelperBot: Leave your session first before you join a new session!\n");
-            }
-        }else if (strcmp(command, "/leavesession") == 0){
+            //}else {
+                //printf("HelperBot: Leave your session first before you join a new session!\n");
+            //}
+        } else if (strcmp(command, "/leavesession") == 0){
+            scanf(" %s", sessionID);
             if (sessFlag == 1){
                 //printf("HelperBot: Leaving your session. \n");
                 leavesession(sessionID);
             } else {
                 printf("You are not in a session yet! Join one to start chatting!\n");
             }
-        }else if (strcmp(command, "/createsession") == 0){
+        } else if (strcmp(command, "/createsession") == 0){
             scanf(" %s", sessionID);
-            if (sessFlag == 0){
+            //if (sessFlag == 0){
                 //printf("HelperBot: Type in a valid session ID to start your session!\n");
                 //prompter();
                 createsession(sessionID);
-            }else {
-                printf("HelperBot: Leave your session first before you start a new session!\n");
-            }
-        }else if (strcmp(command, "/list") == 0){
+            //}else {
+            //    printf("HelperBot: Leave your session first before you start a new session!\n");
+            //}
+        } else if (strcmp(command, "/list") == 0){
             if (loginFlag == 1){
                 //printf("HelperBot: Listing connected clients and available sessions:\n");
                 list();
             } else {
                 printf("HelperBot: Login to a server first!");
             }
-        }else if (strcmp(command, "/quit") == 0){ // calls logout and quits program
+        } else if (strcmp(command, "/quit") == 0){ // calls logout and quits program
             if (loginFlag == 1){
                 logout(); 
             }
             printf("HelperBot: Quitting TextConf. See you soon!\n");
             exit(0);
-        } // leave this if else for second part where messages can be sent to several sessions 
+        } else if (strcmp(command, "/invite") == 0){
+            scanf(" %s %s", toinvite, invSess);
+            if (sessFlag == 1){
+                invite(toinvite, invSess);     
+            } else {
+                printf("Join a session before you can invite your friends!\n");
+            }
+        } else if (strcmp(command, "/accept") == 0){
+            if (invFlag == 1){
+                joinsession(invSess);
+                invFlag = 0; 
+            } else {
+                printf("You haven't receieved an invite!\n");
+            }
+        }
+        
+        // leave this if else for second part where messages can be sent to several sessions 
         /*else if(strcmp(command, "<text>") == 0){
             //printf("HelperBot: Type a message to send to your session!\n");
             //prompter();
@@ -127,7 +152,8 @@ void * messageListener(){
             printf("HelperBot: New session successfully created!\n");
             sessFlag = 1;
         } else if (msg.type == 4){ // 4
-            printf("HelperBot: Session joined successfully!\n"); 
+            printf("HelperBot: Session joined successfully!\n");
+            //clientSessions(msg); 
             sessFlag = 1;
         } else if (msg.type == 5){ // 5 
             printf("HelperBot: Couldn't join session!\n");
@@ -146,11 +172,25 @@ void * messageListener(){
         } 
         else if (strcmp(buff, "TXT_ACK") == 0){ // not doing anything rn
             printf("Text sent\n!");
-        } 
+        } else if (msg.type == 9){
+            printf("HelperBot: Your invitation was sent!\n");
+        } else if (msg.type == 0){
+            printf("HelperBot: Couldn't send invitation!\n");
+            printf("%s\n", msg.data);
+        } else if (msg.type == 10){
+            char answer;
+            printf("TCServer: You have received an invite to join %s from %s! Type '/accept' to accept your invitation or ignore it to keep chatting.\n", 
+                msg.data, msg.source);
+            invFlag = 1;
+            strcpy(invSess, msg.data); 
+        } else if (msg.type == 12){
+            printf("HelperBot: Leave session failed!\n");
+            printf("%s\n", msg.data);
+        }
         else {
             struct Message msg;
             processPacket(buff, &msg);
-            printf("%s: %s\n", msg.source, msg.data);
+            printf("%s %s\n", msg.source, msg.data);
         }
 
         //printf("\n\n");

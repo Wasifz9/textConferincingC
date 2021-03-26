@@ -33,11 +33,13 @@ void* eventHandler (int *conn_fd){
             joinSession(msg);
         } else if (msg.type == 8){
             listStatus(msg);   
-        }else if (msg.type == 6){
+        } else if (msg.type == 6){
             logoutClient(msg);
         } else if (msg.type == 7){
             groupMsg(msg);
             printf("Sending text -> %s\n", msg.data);
+        } else if (msg.type == 0){
+            inviteClient(msg);
         }
 
         printf("\n-------- Server Status --------\n\n");
@@ -164,6 +166,7 @@ int sessClientLookup(struct Session* sess, char* username){ // hash later if we'
 int sessionLookup(char* sessionID){
     for (int i = 0; i < MAX_SESSIONS; i++){
         if (sv->sessions[i] != NULL){
+            printf("%s,%s\n", sessionID, sv->sessions[i]->sessionID);
             if (strcmp(sv->sessions[i]->sessionID, sessionID) == 0){
                 //return sv->sessions[i];
                 return i;
@@ -195,6 +198,7 @@ void acknowledger(int connfd, char* ackToSend, char* error){
         type = 3;
     } else if (strcmp(ackToSend, "JS_ACK") == 0){ // 4
         printf("Joined session!\n");
+        size = strlen(error);
         type = 4; 
     } else if (strcmp(ackToSend, "JS_NACK") == 0){ // 5 
         printf("Couldn't join session: %s\n", error);
@@ -212,7 +216,18 @@ void acknowledger(int connfd, char* ackToSend, char* error){
         printf("Sending server status!\n");
         type = 8; 
         size = strlen(error);
-    }
+    } else if (strcmp(ackToSend, "N_INV") == 0){
+        printf("Invitation failed!\n");
+        type = 0; 
+        size = strlen(error);  
+    } else if (strcmp(ackToSend, "A_INV") == 0){
+        printf("Sending invitation!\n");
+        type = 9; 
+    } else if (strcmp(ackToSend, "LS_NACK") == 0){
+        printf("Leaving session failed!\n");
+        type = 12; 
+        size = strlen(error);
+    } 
 
     msgSender (type, size,"TCServer", error, connfd);
     //write(connfd, ackToSend, strlen(ackToSend));

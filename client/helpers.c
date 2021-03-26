@@ -115,6 +115,14 @@ void processPacket(char* packet, struct Message* msg){
     free(size);
 }
 
-
+void clientSessions(const struct Message msg){
+    for (int i = 0; i < MAX_SESSIONS_JOINED; i++){
+        if (joinedSessions[i] == NULL){
+            strcpy(joinedSessions[i], msg.data);
+            strcat(textCommands[i], msg.data);
+            printf("command: %s, session: %s\n", textCommands[i], joinedSessions[i]);
+        }
+    }
+}
 
 

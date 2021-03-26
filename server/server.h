@@ -47,10 +47,12 @@ struct Client {
     char username[MAX_CLIENT_ID]; // same as ClientID from client perspective 
     unsigned int cId; 
     int sessionJoined; // later make array of sessions joined 
-    int connfd; 
+    int connfd;
+    int activeSessions;  
 };
 
 char buff[2000]; 
+
 struct Message {
     unsigned int type;
     unsigned int size;
@@ -66,6 +68,7 @@ void leaveSession(const struct Message);
 void createSession(const struct Message);
 void groupMsg(const struct Message);
 void listStatus(const struct Message);
+void inviteClient(const struct Message);
 
 // helpers
 void* eventHandler(int* conn_fd);

@@ -70,6 +70,60 @@ void loginClient(const struct Message msg, int connfd){
     
 }
 
+void inviteClient(const struct Message msg){
+    unsigned int member = 1;
+    char *recipientID;   //member 1
+    char *sessionID;         //member 2
+
+    int i1 = 0; //first index of a member
+    int i2 = 0; //index of colon after the member
+
+    for (; (i2 < 2000) && (member < 3); i2++)
+    {
+        if (msg.data[i2] == '|' || msg.data[i2] == '\0'){
+            if (member == 1)    //total_frag
+            {
+                recipientID = malloc(i2 - i1);
+                memcpy(recipientID, msg.data + i1, i2 - i1);
+            }
+            else if (member == 2)    //size
+            {
+                sessionID = malloc(i2 - i1);
+                memcpy(sessionID, msg.data + i1, i2 - i1);
+            }
+            else{printf("error in credential parsing.\n"); exit(1);}
+
+            i1 = i2 + 1;
+            member++;
+        }
+    }
+
+    printf("\nRecipient: %s, sessionID: %s\n", recipientID, sessionID);
+    int cIndex = clientLookup(recipientID);
+    int sIndex = sessionLookup(sessionID); 
+    int srcIndex = clientLookup(msg.source); 
+    
+    if (cIndex == -1){
+        acknowledger(sv->clients[srcIndex]->connfd, "N_INV", "Recipient not logged into the server!");
+        return; 
+    }
+
+    if (sIndex == -1){
+        acknowledger(sv->clients[srcIndex]->connfd, "N_INV", "Session doesn't exist!");
+        return; 
+    }
+
+    if (sv->sessions[sIndex]->memberCount < MAX_SESSION_MEMS){
+        acknowledger(sv->clients[srcIndex]->connfd, "A_INV", NULL); //send ack to sender 
+        msgSender(10, strlen(sessionID), msg.source, sessionID, sv->clients[cIndex]->connfd); //send invitation to recipient
+        return; 
+    }
+
+    acknowledger(sv->clients[srcIndex]->connfd, "N_INV", "Session is full!");
+
+}
+
+
 void createSession(const struct Message msg){
     int cIndex = clientLookup(msg.source);
     session_init(msg, sv->clients[cIndex]);
@@ -92,8 +146,9 @@ void joinSession(const struct Message msg){
             sv->sessions[sIndex]->clients[i] = cli;
             sv->sessions[sIndex]->clients[i]->sessionJoined = sIndex;
             sv->clients[sIndex]->sessionJoined = sIndex;
+            sv->clients[cIndex]->activeSessions+=1; 
             sv->sessions[sIndex]->memberCount+=1;
-            acknowledger(cli->connfd, "JS_ACK", NULL);
+            acknowledger(cli->connfd, "JS_ACK", msg.data);
             return;  
         }
     }
@@ -104,12 +159,47 @@ void joinSession(const struct Message msg){
 
 void leaveSession(const struct Message msg){
     int cIndex = clientLookup(msg.source);
-    sv->clients[cIndex]->sessionJoined=-1;
+    sv->clients[cIndex]->sessionJoined=-1; // not in a session 
+    sv->clients[cIndex]->activeSessions-=1;
+    //setting session joined to being appropriate session location if only in one session
+    if (sv->clients[cIndex]->activeSessions == 1){ 
+        for (int i = 0;i<MAX_SESSIONS; i++){
+
+            if (sv->sessions[i] != NULL){
+
+                for (int j = 0;j<MAX_SESSION_MEMS; j++){
+    
+                    if (sv->sessions[i]->clients[j] != NULL){
+           
+                        if(strcmp(sv->sessions[i]->clients[j]->username,msg.source) == 0){
+                            sv->clients[cIndex]->sessionJoined = i;
+
+                        }
+                    }
+                } 
+            }
+        }
+    }
+
     int sIndex = sessionLookup(msg.data);
+    
+    if (sIndex == -1){
+        acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "Session doesn't exist!");
+        return; 
+    }
+    
     int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
+    
+    if (scIndex == -1){
+        acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "You're not in this session!");
+        return;
+    }
+
+    
     acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK", NULL);
     sv->sessions[sIndex]->clients[scIndex] = NULL;
     sv->sessions[sIndex]->memberCount--;
+    
     if (sv->sessions[sIndex]->memberCount == 0){
         sv->sessions[sIndex] = NULL;
     }
@@ -152,7 +242,7 @@ void client_init(const struct Message msg, int connfd){
     strcpy(cli->username,msg.source);
     cli->sessionJoined = -1; //-1 means hasnt joined one yet 
     cli->connfd = connfd;
-
+    cli->activeSessions = 0;
     for (int i = 0; i<ACCEPTED_CLIENTS; i++){ // currently just filling next available spot 
         if (sv->clients[i] == NULL){
             sv->clients[i] = cli;
@@ -181,6 +271,7 @@ void session_init(const struct Message msg, struct Client* cli){
             sv->sessions[i] = sess;
             sess->sID = i;
             cli->sessionJoined = i;
+            cli->activeSessions +=1; 
             acknowledger(cli->connfd, "NS_ACK", NULL);
             return;
         }
@@ -189,14 +280,76 @@ void session_init(const struct Message msg, struct Client* cli){
 
 void groupMsg (const struct Message msg){
     int cIndex = clientLookup(msg.source);
-    int sIndex = sv->clients[cIndex]->sessionJoined;
-    for (int j = 0;j<MAX_SESSION_MEMS; j++){
-        if (sv->sessions[sIndex]->clients[j] != NULL && 
-            strcmp(sv->sessions[sIndex]->clients[j]->username, msg.source) != 0)
+
+    if (sv->clients[cIndex]-> activeSessions == 1){
+        int sIndex = sv->clients[cIndex]->sessionJoined;        
+       
+        char* src = malloc(sizeof(char) * 100);
+        asprintf(&src, "[%s]", sv->sessions[sIndex]->sessionID);
+        char* data = malloc(sizeof(char) * 1100);
+        asprintf(&data, "%s: %s", msg.source, msg.data);
+        for (int j = 0;j<MAX_SESSION_MEMS; j++){
+            if (sv->sessions[sIndex]->clients[j] != NULL && 
+                strcmp(sv->sessions[sIndex]->clients[j]->username, msg.source) != 0)
+            {
+                msgSender(11, strlen(data), src, data, sv->sessions[sIndex]->clients[j]->connfd);
+            }
+        } 
+    } else {          
+        unsigned int member = 1;
+        char *text = NULL;   //member 1
+        char *sessionID = NULL;        //member 2
+
+        int i1 = 0; //first index of a member
+        int i2 = 0; //index of colon after the member
+
+        for (; (i2 < 2000) && (member < 3); i2++)
         {
-            msgSender(10, msg.size, msg.source, msg.data, sv->sessions[sIndex]->clients[j]->connfd);
+            if (msg.data[i2] == '@' || msg.data[i2] == '\0'){
+                if (member == 1)    //total_frag
+                {
+                    text = malloc(i2 - i1);
+                    memcpy(text, msg.data + i1, i2 - i1);
+                }
+                else if (member == 2)    //size
+                {
+                    sessionID = malloc(i2 - i1 - 1);
+                    memcpy(sessionID, msg.data + i1, i2 - i1 -1);
+                }
+                else{printf("error in credential parsing.\n"); exit(1);}
+
+                i1 = i2 + 1;
+                member++;
+            }
         }
-    } 
+        printf("sessionID in groupMsg: %s\n", sessionID);
+        int sIndex = sessionLookup(sessionID);
+
+        if (sIndex == -1){
+            printf("Session doesnt exist!\n");
+            return; 
+        }
+        
+        int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
+        
+        if (scIndex == -1){
+            printf("You're not in this session!\n");
+            return;
+        }
+
+        char* src = malloc(sizeof(char) * 100);
+        asprintf(&src, "[%s]", sessionID);
+        char* data = malloc(sizeof(char) * 1100);
+        asprintf(&data, "%s: %s", msg.source, text);
+
+        for (int j = 0;j<MAX_SESSION_MEMS; j++){
+            if (sv->sessions[sIndex]->clients[j] != NULL && 
+                strcmp(sv->sessions[sIndex]->clients[j]->username, msg.source) != 0)
+            {
+                msgSender(11, strlen(data), src, data, sv->sessions[sIndex]->clients[j]->connfd);
+            }
+        } 
+    }
 }
 
 void listStatus(const struct Message msg){
