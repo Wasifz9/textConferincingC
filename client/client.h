@@ -28,8 +28,8 @@ struct Message{
 char username[MAX_CLIENT_ID]; 
 int clientFD; 
 int loginFlag;
-int sessID;
-int sessFlag;
+char sessID[100];
+int sessCount;
 int invFlag; 
 char* invSession[100]; 
 

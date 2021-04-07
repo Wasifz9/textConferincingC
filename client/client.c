@@ -27,7 +27,7 @@ int main (int argc, char *argv[]){
     printf("\nWelcome to TextConf by Wasif and Nissar!\n\n");
     printf("HelperBot: You can get started by typing 'help' or if you know your way around, get started!\n");
     loginFlag = 0;
-    sessFlag = 0; 
+    sessCount = 0; 
     while (1){
         char command[50]; 
         //prompter();
@@ -63,9 +63,12 @@ int main (int argc, char *argv[]){
                 //printf("HelperBot: Leave your session first before you join a new session!\n");
             //}
         } else if (strcmp(command, "/leavesession") == 0){
-            scanf(" %s", sessionID);
-            if (sessFlag == 1){
-                //printf("HelperBot: Leaving your session. \n");
+            if (sessCount == 1){
+                leavesession(sessID);
+            }
+            else if (sessCount > 1){
+                printf("HelperBot: You're in more than one session, enter the sessionID of the session you want to leave. \n");
+                scanf(" %s", sessionID);
                 leavesession(sessionID);
             } else {
                 printf("You are not in a session yet! Join one to start chatting!\n");
@@ -93,11 +96,16 @@ int main (int argc, char *argv[]){
             printf("HelperBot: Quitting TextConf. See you soon!\n");
             exit(0);
         } else if (strcmp(command, "/invite") == 0){
-            scanf(" %s %s", toinvite, invSess);
-            if (sessFlag == 1){
+            scanf(" %s", toinvite);
+            if (sessCount == 1){
+                invite(toinvite, sessID); 
+            }
+            else if (sessCount >= 1){
+                printf("HelperBot: Please enter which session you want to invite %s to!\n", toinvite);
+                scanf(" %s",invSess);
                 invite(toinvite, invSess);     
             } else {
-                printf("Join a session before you can invite your friends!\n");
+                printf("Helper Bot: Join a session before you can invite your friends!\n");
             }
         } else if (strcmp(command, "/accept") == 0){
             if (invFlag == 1){
@@ -118,7 +126,7 @@ int main (int argc, char *argv[]){
         }*/ 
         else { //send message if first string isnt a command 
             //printf("HelperBot: Unrecognized command! Please try again or type 'help' for a list of commands!\n");
-            if (loginFlag == 1 && sessFlag == 1){
+            if (loginFlag == 1 && sessCount >= 1){
                 memset(text,NULL,200);
                 strcpy(text, command);
                 int comLength = strlen(command);
@@ -150,21 +158,35 @@ void * messageListener(){
             return;
         } else if (msg.type == 3) { // 3 
             printf("HelperBot: New session successfully created!\n");
-            sessFlag = 1;
+            sessCount +=1;
+            if (sessCount == 1){
+                strcpy(sessID, sessionID);
+            } else if (sessCount > 1){
+                printf("HelperBot: You're now in 2 sessions! Please use @<sessionID> at the end of your message to identify your target session.\n");
+            }
         } else if (msg.type == 4){ // 4
             printf("HelperBot: Session joined successfully!\n");
+            
             //clientSessions(msg); 
-            sessFlag = 1;
+            sessCount +=1;
+            if (sessCount == 1){
+                strcpy(sessID, sessionID); 
+            } else if (sessCount > 1){
+                printf("HelperBot: You're now in 2 sessions! Please use @<sessionID> at the end of your message to identify your target session.\n");
+            }
         } else if (msg.type == 5){ // 5 
             printf("HelperBot: Couldn't join session!\n");
             printf("%s\n", msg.data);
         } else if (msg.type == 6){ // 6
             printf("HelperBot: Left session!\n");
-            sessFlag = 0;
+            sessCount -=1;
+            if (sessCount == 1){
+                strcpy(sessID, sessionID); 
+            }
         } else if (msg.type == 7){ // 7
             printf("HelperBot: Succesfully logged out of the server! \n");
             loginFlag = 0;
-            sessFlag = 0;
+            sessCount = 0;
             return;
         } else if (msg.type == 8){
             //printf("HelperBot: Printing server list!\n");

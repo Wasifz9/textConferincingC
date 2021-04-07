@@ -159,7 +159,55 @@ void joinSession(const struct Message msg){
 
 void leaveSession(const struct Message msg){
     int cIndex = clientLookup(msg.source);
-    sv->clients[cIndex]->sessionJoined=-1; // not in a session 
+    /*if (sv->clients[cIndex]->activeSessions == 1){
+        printf("only in one session\n");
+        int sIndex = sv->clients[cIndex]->sessionJoined;
+        sv->clients[cIndex]->activeSessions-=1;
+
+        int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
+    
+        if (scIndex == -1){
+            acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "You're not in this session!");
+            return;
+        }
+
+        
+        acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK", NULL);
+        sv->sessions[sIndex]->clients[scIndex] = NULL;
+        sv->sessions[sIndex]->memberCount--;
+        
+        if (sv->sessions[sIndex]->memberCount == 0){
+            sv->sessions[sIndex] = NULL;
+        }
+        return; 
+    }*/
+
+    //sv->clients[cIndex]->sessionJoined=-1; // not in a session 
+    int sIndex; 
+    if (sv->clients[cIndex]->activeSessions == 1){
+        sIndex = sv->clients[cIndex]->sessionJoined;
+    } else {
+        sIndex = sessionLookup(msg.data);
+    }
+
+    if (sIndex == -1){
+        acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "Session doesn't exist!");
+        return; 
+    }
+    
+    int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
+    
+    if (scIndex == -1){
+        acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "You're not in this session!");
+        return;
+    }
+
+    
+    acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK", NULL);
+    sv->sessions[sIndex]->clients[scIndex] = NULL;
+    sv->sessions[sIndex]->memberCount--;
+    
+
     sv->clients[cIndex]->activeSessions-=1;
     //setting session joined to being appropriate session location if only in one session
     if (sv->clients[cIndex]->activeSessions == 1){ 
@@ -181,25 +229,9 @@ void leaveSession(const struct Message msg){
         }
     }
 
-    int sIndex = sessionLookup(msg.data);
-    
-    if (sIndex == -1){
-        acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "Session doesn't exist!");
-        return; 
-    }
-    
-    int scIndex = sessClientLookup(sv->sessions[sIndex], msg.source);
-    
-    if (scIndex == -1){
-        acknowledger(sv->clients[cIndex]->connfd, "LS_NACK", "You're not in this session!");
-        return;
-    }
 
-    
-    acknowledger(sv->sessions[sIndex]->clients[scIndex]->connfd, "LS_ACK", NULL);
-    sv->sessions[sIndex]->clients[scIndex] = NULL;
-    sv->sessions[sIndex]->memberCount--;
-    
+
+
     if (sv->sessions[sIndex]->memberCount == 0){
         sv->sessions[sIndex] = NULL;
     }
