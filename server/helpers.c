@@ -75,11 +75,11 @@ void* eventHandler (int *conn_fd){
         printf("|||||||||||||||||||||||||||||||||\n\n");
 
         if (msg.type == 6){
-            return;
+            return NULL;
         }
-
         
     }
+
 }
 
 // parse paclet into members and data 
@@ -228,7 +228,7 @@ void acknowledger(int connfd, char* ackToSend, char* error){
         type = 12; 
         size = strlen(error);
     } 
-
+    printf("\nResponse code: %d\n", type);
     msgSender (type, size,"TCServer", error, connfd);
     //write(connfd, ackToSend, strlen(ackToSend));
 }
@@ -241,4 +241,21 @@ int msgSender (int type, unsigned int size, char* source, char * data, int connf
         size, source, data);
     //printf("message to send: %s\n", serializedPacket);
     write(connfd, serializedPacket, strlen(serializedPacket));
+}
+
+void dataSplitter(char* original, char** first, char** second, char delimeter, int sz){
+    int i1 = 0; //first index of a member
+    int i2 = 0; //index of colon after the member    
+
+    while(i2 <= sz){
+        if (original[i2] == delimeter){
+            *first = malloc(i2 - i1);
+            memcpy(*first, original + i1, i2 - i1);
+            i1 = i2+1; 
+            break; 
+        }
+        i2++;    
+    }
+    *second = malloc(sz - i2);
+    memcpy(*second, original + i1, sz - i2);
 }

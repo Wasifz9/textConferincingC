@@ -1,5 +1,6 @@
 #include "server.h"
 
+
 // have to write more code to handle requests cleaner. 
 // this function will be complciated 
 

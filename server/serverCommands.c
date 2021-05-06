@@ -12,10 +12,11 @@ void loginClient(const struct Message msg, int connfd){
     char *username;   //member 1
     char *password;         //member 2
 
+    void* data = msg.data; 
     int i1 = 0; //first index of a member
     int i2 = 0; //index of colon after the member
 
-    for (; (i2 < 2000) && (member < 3); i2++)
+    /*for (; (i2 < 2000) && (member < 3); i2++)
     {
         if (msg.data[i2] == ',' || msg.data[i2] == '\0'){
             if (member == 1)    //total_frag
@@ -33,7 +34,30 @@ void loginClient(const struct Message msg, int connfd){
             i1 = i2 + 1;
             member++;
         }
+    }*/
+
+
+    /*while(i2 <= msg.size){
+        if (msg.data[i2] == ','){
+            username = malloc(i2 - i1);
+            memcpy(username, msg.data + i1, i2 - i1);
+            i1 = i2+1; 
+            break; 
+        }
+        i2++;    
     }
+
+    printf("\n parsed username: %s\n", username);
+    password = malloc(msg.size - i2);
+    memcpy(password, msg.data + i1, msg.size - i2);*/
+
+    dataSplitter(msg.data, &username, &password, ',', msg.size);
+
+
+
+
+
+    
 
     for (int i = 0; i < MAX_CLIENTS; i++){
         if (sv->clients[i] != NULL){ 
@@ -75,7 +99,7 @@ void inviteClient(const struct Message msg){
     char *recipientID;   //member 1
     char *sessionID;         //member 2
 
-    int i1 = 0; //first index of a member
+   /* int i1 = 0; //first index of a member
     int i2 = 0; //index of colon after the member
 
     for (; (i2 < 2000) && (member < 3); i2++)
@@ -96,7 +120,10 @@ void inviteClient(const struct Message msg){
             i1 = i2 + 1;
             member++;
         }
-    }
+    }*/
+
+    dataSplitter(msg.data, &recipientID, &sessionID, '|', msg.size);
+
 
     printf("\nRecipient: %s, sessionID: %s\n", recipientID, sessionID);
     int cIndex = clientLookup(recipientID);
@@ -332,7 +359,7 @@ void groupMsg (const struct Message msg){
         char *text = NULL;   //member 1
         char *sessionID = NULL;        //member 2
 
-        int i1 = 0; //first index of a member
+        /*int i1 = 0; //first index of a member
         int i2 = 0; //index of colon after the member
 
         for (; (i2 < 2000) && (member < 3); i2++)
@@ -353,7 +380,9 @@ void groupMsg (const struct Message msg){
                 i1 = i2 + 1;
                 member++;
             }
-        }
+        }*/ 
+
+        dataSplitter(msg.data, &text, &sessionID, '@', msg.size);
         printf("sessionID in groupMsg: %s\n", sessionID);
         int sIndex = sessionLookup(sessionID);
 

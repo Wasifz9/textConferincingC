@@ -2,13 +2,9 @@
 #define SERVER_H
 
 //START HERE: the owner of the chat (creator) cant send texts.  
-
-//./testclient wasifz9 password nissar pathetic 128.100.13.132 5001
-//wasifz9 password 128.100.13.132 5000
-//wasifz9 password 128.100.13.132 5001
-//nissar pathetic 128.100.13.132 5000 
-//nissar pathetic 128.100.13.132 5001
-//instructor allknowing 128.100.13.132 5001
+// /login wasifz9 password 192.168.2.31 5000
+// /login instructor allknowing 192.168.2.31 5000
+// /login nissar pathetic 192.168.2.31 5000
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
@@ -79,6 +75,7 @@ int sessionLookup(char* sessionID);
 int sessClientLookup(struct Session* sess, char* username);
 void acknowledger(int connfd, char* ackToSend, char* error);
 int msgSender (int type, unsigned int size, char* source, char * data, int connfd);
+void dataSplitter(char* original, char** first, char** second, char delimter, int sz);
 
 //server 
 struct Server* server_init();
